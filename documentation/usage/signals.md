@@ -13,22 +13,14 @@ Example:
 
 ```lua
 local tween = Tween(workspace.Part, {Transparency = 1}, {Time = 2})
-tween.Updated:Connect(function(alpha)
-	-- Alpha is a value in the range 0-1.
-	-- That's why we multiply by 100 to convert to percentage.
-	print("Progress: "..tostring(alpha*100).."%") -- For example "Progress: 50%".
+tween.Updated:Connect(function()
+	-- Alpha is in the range 0-1, so we multiply by 100 to get the percentage.
+	print("Progress: "..tween.Alpha*100.."%") -- For example "Progress: 50%".
 end)
 tween:Start()
 ```
 
 [^1]: Fires every iteration of playback; every time the instance's values are updated.
-
-    \
-    It provides the current alpha (linear) at every update.
-
-
-
-    _`alpha` is the progress from start to finish in the range 0-1. With reversing and repeats it will actually go back and forth._
 
 [^2]: Fires when the playback is started or resumed.
 
@@ -38,4 +30,4 @@ tween:Start()
 
 [^4]: Fires when playback finishes.
 
-    Does not fire when playback is stopped.
+    Does _**not**_ fire when playback is stopped.

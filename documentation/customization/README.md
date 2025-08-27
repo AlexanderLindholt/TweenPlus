@@ -10,7 +10,7 @@ You don’t have to provide all, or even any, because they all have defaults.
 You use it like this:
 
 ```lua
-TweenPlus(
+local tween = Tween(
 	workspace.Part,
 	{
 		Position = Vector3.new(0, 10, 0),

@@ -4,7 +4,7 @@ When you require the module, it will return a function, which you can use to cre
 Example:
 
 ```lua
-local tween = TweenPlus(
+local tween = Tween(
 	workspace.Part, -- Instance to tween.
 	{} -- Properties to tween.
 )
@@ -13,7 +13,7 @@ local tween = TweenPlus(
 You simply input all the properties you would like to tween, like so:
 
 ```lua
-local tween = TweenPlus(
+local tween = Tween(
 	workspace.Part,
 	{
 		Position = Vector3.new(0, 10, 0),

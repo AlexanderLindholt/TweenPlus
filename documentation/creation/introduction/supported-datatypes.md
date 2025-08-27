@@ -1,5 +1,4 @@
 ---
-hidden: true
 icon: list
 ---
 
@@ -22,7 +21,7 @@ P**roperty/attribute types:**
 
 
 
-**Method values:**
+**Method-based values:**
 
 * `Pivot`
 * `Scale`

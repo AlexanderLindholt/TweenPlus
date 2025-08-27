@@ -10,7 +10,7 @@ Other than that they work the same as usual properties.
 Example usage of attributes:
 
 ```lua
-local tween = TweenPlus(
+local tween = Tween(
 	workspace.Part,
 	{
 		Position = Vector3.new(0, 10, 0),
