@@ -12,7 +12,8 @@ local tween = Tween(
 )
 ```
 
-You simply input all the properties you would like to tween, like so:
+You simply input all the properties you would like to tween.\
+Example:
 
 ```lua
 local tween = Tween(
