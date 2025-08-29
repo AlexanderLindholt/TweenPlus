@@ -1,4 +1,5 @@
 --!optimize 2
+--!native
 
 local function numberLerper(a, b)
 	local difference = b - a
@@ -39,7 +40,7 @@ local function commonSuffix(a, b, prefixLen)
 	return maxLength
 end
 
-@native local function rgbToOklab(r, g, b)
+local function rgbToOklab(r, g, b)
 	-- Gamma expansion.
 	r = if r > 0.04045 then ((r + 0.055)/1.055)^2.4 else r/12.92
 	g = if g > 0.04045 then ((g + 0.055)/1.055)^2.4 else g/12.92
@@ -62,7 +63,7 @@ end
 		0.0259040371*l + 0.7827717662*m - 0.8086757660*s
 end
 
-@native local function oklabToRGB(l, a, b)
+local function oklabToRGB(l, a, b)
 	-- Matrix transformation.
 	local m = l - 0.1055613458*a - 0.0638541728*b
 	local s = l - 0.0894841775*a - 1.2914855480*b
@@ -120,7 +121,7 @@ local function colorLerper(a, b)
 	end
 end
 
-@native local function findKeypoints(source, targetTime)
+local function findKeypoints(source, targetTime)
 	local low = 1
 	local high = #source
 	while low <= high do
@@ -255,8 +256,8 @@ return {
 		
 		NumberSequence = function(a, b)
 			local uniqueTimes = {}
-			for _, keypoint in a.Keypoints do
-				table.insert(uniqueTimes, keypoint.Time)
+			for index, keypoint in a.Keypoints do
+				uniqueTimes[index] = keypoint.Time
 			end
 			for _, keypoint in b.Keypoints do
 				table.insert(uniqueTimes, keypoint.Time)
@@ -265,11 +266,11 @@ return {
 			
 			local valueLerpers = {}
 			local envelopeLerpers = {}
-			for _, time in uniqueTimes do
+			for index, time in uniqueTimes do
 				local aValue, aEnvelope = getNumberKeypoint(a, time)
 				local bValue, bEnvelope = getNumberKeypoint(b, time)
-				table.insert(valueLerpers, numberLerper(aValue, bValue))
-				table.insert(envelopeLerpers, numberLerper(aEnvelope, bEnvelope))
+				valueLerpers[index] = numberLerper(aValue, bValue)
+				envelopeLerpers[index] = numberLerper(aEnvelope, bEnvelope)
 			end
 			
 			return function(alpha)
@@ -278,11 +279,11 @@ return {
 				
 				local keypoints = {}
 				for index, time in uniqueTimes do
-					table.insert(keypoints, NumberSequenceKeypoint.new(
+					keypoints[index] = NumberSequenceKeypoint.new(
 						time,
 						valueLerpers[index](alpha),
 						envelopeLerpers[index](alpha)
-					))
+					)
 				end
 				return NumberSequence.new(keypoints)
 			end
@@ -290,8 +291,8 @@ return {
 		
 		ColorSequence = function(a, b)
 			local uniqueTimes = {}
-			for _, keypoint in a.Keypoints do
-				table.insert(uniqueTimes, keypoint.Time)
+			for index, keypoint in a.Keypoints do
+				uniqueTimes[index] = keypoint.Time
 			end
 			for _, keypoint in b.Keypoints do
 				table.insert(uniqueTimes, keypoint.Time)
@@ -299,8 +300,8 @@ return {
 			table.sort(uniqueTimes)
 			
 			local lerpers = {}
-			for _, time in uniqueTimes do
-				table.insert(lerpers, colorLerper(getColorKeypoint(a, time), getColorKeypoint(b, time)))
+			for index, time in uniqueTimes do
+				lerpers[index] = colorLerper(getColorKeypoint(a, time), getColorKeypoint(b, time))
 			end
 			
 			return function(alpha)
@@ -309,13 +310,10 @@ return {
 				
 				local keypoints = {}
 				for index, time in uniqueTimes do
-					if alpha == 0 then return a end
-					if alpha == 1 then return b end
-					
-					table.insert(keypoints, ColorSequenceKeypoint.new(
+					keypoints[index] = ColorSequenceKeypoint.new(
 						time,
 						lerpers[index](alpha)
-					))
+					)
 				end
 				return ColorSequence.new(keypoints)
 			end
@@ -336,6 +334,7 @@ return {
 				return instance:GetPivot()
 			end
 		},
+		
 		Scale = {
 			Target = "Model",
 			Set = function(instance, a, b)

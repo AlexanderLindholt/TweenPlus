@@ -8,13 +8,13 @@ local advancedValueFunctions = valueFunctions.Advanced
 return function(apiMap, instance, values)
 	-- Get properties and verify class.
 	local classProperties = apiMap[instance.ClassName]
-	if not classProperties then error("Could not identify class.", 3) end
+	if not classProperties then error("Could not identify the class of instance '"..instance:GetFullName().."'.", 3) end
 
 	-- Verify values and add update functions for each.
 	local updateFunctions, resetFunctions = {}, {}
 	
 	for valueName, valueDestination in values do
-		if type(valueName) ~= "string" then error("Invalid value name of type '"..typeof(valueName).."' instead of string.", 3) end
+		if type(valueName) ~= "string" then error("Invalid value name of type '"..typeof(valueName).."'. It should be a string.", 3) end
 		
 		if valueName:sub(1, 1) == "@" then
 			-- Attribute.
@@ -41,12 +41,12 @@ return function(apiMap, instance, values)
 				if not instance:IsA(value.Target) then error("'"..instance:GetFullName().."'' doesn't support '"..valueName.."'.", 3) end
 				
 				local original = value.Get(instance)
-				local set = value.Set
+				local setValue = value.Set(instance, original, valueDestination)
 				table.insert(updateFunctions, function(alpha)
-					set(instance, original, valueDestination, alpha)
+					setValue(alpha)
 				end)
 				table.insert(resetFunctions, function()
-					set(instance, original, valueDestination, 0)
+					setValue(0)
 				end)
 			else
 				-- Property.

@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 local plugin = script:FindFirstAncestorOfClass("Plugin")
 
 -- Signal library.
-local Signal = nil
+local Signal
 if plugin then
 	for _, instance in plugin:GetDescendants() do
 		if instance:HasTag("Signal") then
@@ -24,8 +24,7 @@ else
 end
 
 -- Network packets and Roblox API map.
-local packets = nil
-local apiMap = nil
+local packets, apiMap
 if plugin then
 	for _, instance in plugin:GetDescendants() do
 		if instance:HasTag("APIMap") then
@@ -147,7 +146,6 @@ local function start(tween: InternalTween, startOverride)
 			if values[value] then
 				stop(otherTween)
 				if otherTween.Stopped then otherTween.Stopped:Fire() end
-				tweens[otherTween] = nil
 				break
 			end
 		end
@@ -201,9 +199,13 @@ do
 				for _, update in tween.UpdateFunctions do update(easedAlpha) end
 			end
 			
-			-- Fire updated signal with raw alpha.
+			-- Save alpha and fire update signal.
 			local updateSignal = tween.Updated
-			if updateSignal then updateSignal:Fire(alpha) end
+			if updateSignal then
+				-- Now we know it's a local tween because it has signals.
+				tween.Alpha = alpha
+				updateSignal:Fire()
+			end
 			
 			-- Phase completion stuff.
 			if phaseCompleted then
@@ -261,14 +263,16 @@ local Tween = {}
 Tween.__index = Tween
 
 Tween.Start = function(tween: InternalTween)
-	if not tween.StopTime then return end
+	if not tween.StopTime then return tween end
 	start(tween)
 	tween.Started:Fire()
+	return tween
 end
 Tween.Stop = function(tween: InternalTween)
-	if tween.StopTime then return end
+	if tween.StopTime then return tween end
 	stop(tween)
 	tween.Stopped:Fire()
+	return tween
 end
 Tween.Reset = function(tween: InternalTween)
 	if not tween.StopTime then
@@ -281,6 +285,7 @@ Tween.Reset = function(tween: InternalTween)
 	tween.Repetitions = 0
 	tween.Reverse = nil
 	for _, reset in tween.ResetFunctions do reset() end
+	return tween
 end
 Tween.Destroy = destroy
 
@@ -303,6 +308,9 @@ if packets then
 		local function serverDestroy(tween: InternalTween)
 			-- Disconnect destroy connection.
 			tween.DestroyConnection:Disconnect()
+			
+			-- Remove from collection.
+			serverTweens[tween.Identifier] = nil
 			
 			-- Ensure no playback.
 			if not tween.StopTime then
@@ -334,7 +342,7 @@ if packets then
 			
 			-- Create tween.
 			local easingStyle = options[2]
-			local tween = nil
+			local tween
 			tween = {
 				-- Handle instance destroy.
 				DestroyConnection = instance.Destroying:Connect(function()
@@ -355,17 +363,17 @@ if packets then
 					if easingStyle == "Linear" then easingFunctions.Linear else easingFunctions[easingStyle][options[3]]
 				else
 					easingFunctions.Linear,
-					DelayTime = options[4] or defaults.DelayTime,
-					Reverses = options[5] or defaults.Reverses,
-					RepeatCount = options[6] or defaults.RepeatCount,
-					Interval = options[7] or defaults.Interval,
-					
-					-- Time markers.
-					StartTime = 0,
-					StopTime = 0,
-					
-					-- Trackers.
-					Repetitions = 0
+				DelayTime = options[4] or defaults.DelayTime,
+				Reverses = options[5] or defaults.Reverses,
+				RepeatCount = options[6] or defaults.RepeatCount,
+				Interval = options[7] or defaults.Interval,
+				
+				-- Time markers.
+				StartTime = 0,
+				StopTime = 0,
+				
+				-- Trackers.
+				Repetitions = 0
 			}
 			
 			-- Store the tween with its given identifier.
@@ -440,7 +448,7 @@ return function(instance, values, options)
 		tweenTime = 1/tweenTime
 	end
 	
-	local ease = nil
+	local ease
 	do
 		local easingStyle = options.EasingStyle
 		local easing = easingFunctions[easingStyle]
@@ -487,7 +495,7 @@ return function(instance, values, options)
 	end
 	
 	-- Create tween.
-	local tween = nil
+	local tween
 	tween = setmetatable({
 		-- Handle instance destroy.
 		DestroyConnection = instance.Destroying:Connect(function()
@@ -521,7 +529,8 @@ return function(instance, values, options)
 		StopTime = 0,
 		
 		-- Trackers.
-		Repetitions = 0
+		Repetitions = 0,
+		Alpha = 0
 	}, Tween)
 	
 	-- Return tween.

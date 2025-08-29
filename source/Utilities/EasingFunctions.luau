@@ -172,31 +172,25 @@ end
 
 -- Elastic easing.
 local function inElastic(alpha)
-	local s = nil
-	if elasticInA < 1 then
-		s = elasticInP/4
+	local s = if elasticInA < 1 then
+		elasticInP/4
 	else
-		s = elasticInP/(2*math.pi)*math.asin(1/elasticInA)
-	end
+		elasticInP/(2*math.pi)*math.asin(1/elasticInA)
 	local t = alpha - 1
 	return -elasticInA*2^(10*t)*math.sin((t - s)*(2*math.pi/elasticInP))
 end
 local function outElastic(alpha)
-	local s = nil
-	if elasticOutA < 1 then
-		s = elasticOutP/4
+	local s = if elasticOutA < 1 then
+		elasticOutP/4
 	else
-		s = elasticOutP/(2*math.pi)*math.asin(1/elasticOutA)
-	end
+		elasticOutP/(2*math.pi)*math.asin(1/elasticOutA)
 	return elasticOutA*2^(-10*alpha)*math.sin((alpha - s)*(2*math.pi/elasticOutP)) + 1
 end
 local function inOutElastic(alpha)
-	local s = nil
-	if elasticInOutA < 1 then
-		s = elasticInOutP/4
+	local s = if elasticInOutA < 1 then
+		elasticInOutP/4
 	else
-		s = elasticInOutP/(2*math.pi)*math.asin(1/elasticInOutA)
-	end
+		elasticInOutP/(2*math.pi)*math.asin(1/elasticInOutA)
 	alpha *= 2
 	local t = alpha - 1
 	return if alpha < 1 then
