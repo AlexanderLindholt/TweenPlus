@@ -4,6 +4,8 @@ When you require the module, it will return a function, which you can use to cre
 Example:
 
 ```lua
+local Tween = require(script.TweenPlus)
+
 local tween = Tween(
 	workspace.Part, -- Instance to tween.
 	{} -- Properties to tween.
@@ -22,7 +24,3 @@ local tween = Tween(
 	}
 )
 ```
-
-{% content-ref url="supported-datatypes.md" %}
-[supported-datatypes.md](supported-datatypes.md)
-{% endcontent-ref %}
