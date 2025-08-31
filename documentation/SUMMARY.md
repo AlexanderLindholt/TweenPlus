@@ -12,8 +12,8 @@
 
 ***
 
-* [Customization](customization/README.md)
-  * [Customization options](customization/customization-options.md)
+* [Options](customization/README.md)
+  * [Options list](customization/customization-options.md)
   * [FPS](customization/fps.md)
   * [Update](customization/update.md)
   * [Replicate](customization/replicate.md)

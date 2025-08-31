@@ -1,8 +1,8 @@
 ---
-icon: fill-drip
+icon: ballot
 ---
 
-# Customization
+# Options
 
 The customization works with a table, where you can provide any customizations you want.\
 You don’t have to provide all, or even any, because they all have defaults.
