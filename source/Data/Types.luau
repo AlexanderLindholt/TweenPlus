@@ -50,6 +50,7 @@ export type InternalTween = {
 	InverseTweenTime: number,
 	Ease: (alpha: number) -> (),
 	RepeatCount: number,
+	Reverses: boolean?,
 	Interval: number?,
 	Table: {},
 	
@@ -59,9 +60,9 @@ export type InternalTween = {
 	LastUpdate: number?,
 	
 	Repetitions: number,
-	Reverses: boolean,
-	Reverse: boolean
+	Reverse: boolean?,
+	Alpha: number
 }
 
--- Obligatory return.
+-- Obligatory module return.
 return nil

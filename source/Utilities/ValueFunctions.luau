@@ -40,6 +40,39 @@ local function commonSuffix(a, b, prefixLen)
 	return maxLength
 end
 
+local function quaternionFromCFrame(cframe)
+	local rightVector = cframe.RightVector
+	local upVector = cframe.UpVector
+	local lookVector = cframe.LookVector
+	
+	local rightX, rightY, rightZ = rightVector.X, rightVector.Y, rightVector.Z
+	local upX, upY, upZ = upVector.X, upVector.Y, upVector.Z
+	local leftX, leftY, leftZ = lookVector.X, lookVector.Y, lookVector.Z
+	
+	local trace = rightX + upY + leftZ
+	if trace > 0 then
+		local s = math.sqrt(trace + 1)*2
+		return (upZ - leftY)/s, (leftX - rightZ)/s, (rightY - upX)/s, 0.25*s, cframe.X, cframe.Y, cframe.Z
+	end
+	
+	if rightX > upY and rightX > leftZ then
+		local s = math.sqrt(1 + rightX - upY - leftZ)*2
+		return 0.25*s, (upX + rightY)/s, (leftX + rightZ)/s, (upZ - leftY)/s, cframe.X, cframe.Y, cframe.Z
+	elseif upY > leftZ then
+		local s = math.sqrt(1 + upY - rightX - leftZ)*2
+		return (upX + rightY)/s, 0.25*s, (upZ + leftY)/s, (leftX - rightZ)/s, cframe.X, cframe.Y, cframe.Z
+	else
+		local s = math.sqrt(1 + leftZ - rightX - upY)*2
+		return (leftX + rightZ)/s, (upZ + leftY)/s, 0.25*s, (rightY - upX)/s, cframe.X, cframe.Y, cframe.Z
+	end
+end
+local function normalize(x, y, z, w)
+	local m = math.sqrt(x^2 + y^2 + z^2 + w^2)
+	if m == 0 then return 0, 0, 0, 1 end
+	m = 1/m
+	return x*m, y*m, z*m, w*m
+end
+
 local function rgbToOklab(r, g, b)
 	-- Gamma expansion.
 	r = if r > 0.04045 then ((r + 0.055)/1.055)^2.4 else r/12.92
@@ -62,7 +95,6 @@ local function rgbToOklab(r, g, b)
 		1.9779984951*l - 2.4285922050*m + 0.4505937099*s,
 		0.0259040371*l + 0.7827717662*m - 0.8086757660*s
 end
-
 local function oklabToRGB(l, a, b)
 	-- Matrix transformation.
 	local m = l - 0.1055613458*a - 0.0638541728*b
@@ -125,7 +157,7 @@ local function findKeypoints(source, targetTime)
 	local low = 1
 	local high = #source
 	while low <= high do
-		local mid = math.floor((low + high)/2)
+		local mid = (low + high)//2
 		local midTime = source[mid].Time
 		if midTime < targetTime then
 			low = mid + 1
@@ -139,28 +171,35 @@ local function findKeypoints(source, targetTime)
 end
 
 local function getNumberKeypoint(sequence, time)
-	local index1, index2 = findKeypoints(sequence.Keypoints, time)
-	local a = sequence.Keypoints[index1]
-	local b = sequence.Keypoints[index2]
-	if a.Time == b.Time then
-		return a.Value, a.Envelope
-	else
-		local point = (time - a.Time)/(b.Time - a.Time)
-		return
-			a.Value + (b.Value - a.Value)*point,
-			a.Envelope + (b.Envelope - a.Envelope)*point
-	end
+	local keypoints = sequence.Keypoints
+	local index1, index2 = findKeypoints(keypoints, time)
+	local a = keypoints[index1]
+	local b = keypoints[index2]
+	
+	local aTime = a.Time
+	
+	if aTime == b.Time then return a.Value, a.Envelope end
+	
+	local aValue = a.Value
+	local aEnvelope = a.Envelope
+	
+	local alpha = (time - aTime)/(b.Time - aTime)
+	return
+		aValue + (b.Value - aValue)*alpha,
+		aEnvelope + (b.Envelope - aEnvelope)*alpha
 end
 local function getColorKeypoint(sequence, time)
-	local index1, index2 = findKeypoints(sequence.Keypoints, time)
-	local a = sequence.Keypoints[index1]
-	local b = sequence.Keypoints[index2]
-	if a.Time == b.Time then
-		return a.Value
-	else
-		local alpha = (time - a.Time)/(b.Time - a.Time)
-		return a.Value:Lerp(b.Value, alpha)
-	end
+	local keypoints = sequence.Keypoints
+	local index1, index2 = findKeypoints(keypoints, time)
+	local a = keypoints[index1]
+	local b = keypoints[index2]
+	
+	local aTime = a.Time
+	
+	if aTime == b.Time then return a.Value end
+	
+	local alpha = (time - aTime)/(b.Time - aTime)
+	return a.Value:Lerp(b.Value, alpha)
 end
 
 return {
@@ -168,34 +207,147 @@ return {
 		number = numberLerper,
 		
 		Vector3 = function(a, b)
+			local aX = a.X
+			local aY = a.Y
+			local aZ = a.Z
+			local xDifference = b.X - aX
+			local yDifference = b.Y - aY
+			local zDifference = b.Z - aZ
 			return function(alpha)
-				return a:Lerp(b, alpha)
+				return vector.create(
+					aX + xDifference*alpha,
+					aY + yDifference*alpha,
+					aZ + zDifference*alpha
+				)
 			end
 		end,
 		
 		UDim2 = function(a, b)
+			local aX = a.X
+			local bX = b.X
+			local aXScale = aX.Scale
+			local aXOffset = aX.Offset
+			local xScaleDifference = bX.Scale - aXScale
+			local xOffsetDifference = bX.Offset - aXOffset
+			
+			local aY = a.Y
+			local bY = b.Y
+			local aYScale = aY.Scale
+			local aYOffset = aY.Offset
+			local yScaleDifference = bY.Scale - aYScale
+			local yOffsetDifference = bY.Offset - aYOffset
+			
 			return function(alpha)
-				return a:Lerp(b, alpha)
+				return UDim2.new(
+					aXScale + xScaleDifference*alpha,
+					aXOffset + xOffsetDifference*alpha,
+					
+					aYScale + yScaleDifference*alpha,
+					aYOffset + yOffsetDifference*alpha
+				)
 			end
 		end,
 		
 		Vector2 = function(a, b)
+			local aX = a.X
+			local aY = a.Y
+			local xDifference = b.X - aX
+			local yDifference = b.Y - aY
 			return function(alpha)
-				return a:Lerp(b, alpha)
+				return Vector2.new(
+					aX + xDifference*alpha,
+					aY + yDifference*alpha
+				)
 			end
 		end,
 		
 		CFrame = function(a, b)
+			-- Positions.
+			local ax, ay, az = a.X, a.Y, a.Z
+			local bx, by, bz = b.X, b.Y, b.Z
+			local dx, dy, dz = bx - ax, by - ay, bz - az
+			
+			-- Quaternions (and normalize).
+			local aqx, aqy, aqz, aqw = quaternionFromCFrame(a)
+			local bqx, bqy, bqz, bqw = quaternionFromCFrame(b)
+			aqx, aqy, aqz, aqw = normalize(aqx, aqy, aqz, aqw)
+			bqx, bqy, bqz, bqw = normalize(bqx, bqy, bqz, bqw)
+			
+			-- Dot, and shortest path.
+			local dot = aqx*bqx + aqy*bqy + aqz*bqz + aqw*bqw
+			if dot < 0 then
+				dot = -dot
+				bqx, bqy, bqz, bqw = -bqx, -bqy, -bqz, -bqw
+			end
+			
+			-- Slerp precompute or linear fallback.
+			local useLinear = dot > 0.9995
+			local theta, inverseSine
+			if not useLinear then
+				theta = math.acos(math.clamp(dot, -1, 1))
+				inverseSine = 1/math.sin(theta)
+			end
+			
+			-- Interpolation function.
 			return function(alpha)
-				return a:Lerp(b, alpha)
+				if alpha == 0 then return a end
+				if alpha == 1 then return b end
+				
+				-- Position lerp.
+				local px = ax + dx*alpha
+				local py = ay + dy*alpha
+				local pz = az + dz*alpha
+				
+				-- Quaternion lerp.
+				local rx, ry, rz, rw
+				if useLinear then
+					local lx = aqx + (bqx - aqx)*alpha
+					local ly = aqy + (bqy - aqy)*alpha
+					local lz = aqz + (bqz - aqz)*alpha
+					local lw = aqw + (bqw - aqw)*alpha
+					local m = math.sqrt(lx^2 + ly^2 + lz^2 + lw^2)
+					if m == 0 then
+						rx, ry, rz, rw = 0, 0, 0, 1
+					else
+						m = 1/m
+						rx, ry, rz, rw = lx*m, ly*m, lz*m, lw*m
+					end
+				else
+					local s0 = math.sin((1 - alpha)*theta)*inverseSine
+					local s1 = math.sin(alpha*theta)*inverseSine
+					rx = s0*aqx + s1*bqx
+					ry = s0*aqy + s1*bqy
+					rz = s0*aqz + s1*bqz
+					rw = s0*aqw + s1*bqw
+					local m = math.sqrt(rx^2 + ry^2 + rz^2 + rw^2)
+					if m ~= 0 then
+						m = 1/m
+						rx, ry, rz, rw = rx*m, ry*m, rz*m, rw*m
+					end
+				end
+				
+				-- Build CFrame.
+				return CFrame.new(
+					-- Position.
+					px, py, pz,
+					-- Matrix.
+					1 - 2*(ry^2 + rz^2), 2*(rx*ry - rw*rz), 2*(rx*rz + rw*ry),
+					2*(rx*ry + rw*rz), 1 - 2*(rx^2 + rz^2),  2*(ry*rz - rw*rx),
+					2*(rx*rz - rw*ry), 2*(ry*rz + rw*rx), 1 - 2*(rx^2 + ry^2)
+				)
 			end
 		end,
 		
 		UDim = function(a, b)
-			local scaleDifference = b.Scale - a.Scale
-			local offsetDifference = b.Offset - a.Offset
+			local aScale = a.Scale
+			local aOffset = a.Offset
+			local scaleDifference = b.Scale - aScale
+			local offsetDifference = b.Offset - aOffset
 			return function(alpha)
-				return UDim.new(a.Scale + scaleDifference*alpha, a.Offset + offsetDifference*alpha)
+				return UDim.new(
+					aScale + scaleDifference*alpha,
+					aOffset + offsetDifference*alpha
+				)
 			end
 		end,
 		
@@ -247,10 +399,15 @@ return {
 		Color3 = colorLerper,
 		
 		NumberRange = function(a, b)
-			local minimumDifference = b.Min - a.Min
-			local maximumDifference = b.Max - a.Max
+			local aMin = a.Min
+			local aMax = a.Max
+			local minimumDifference = b.Min - aMin
+			local maximumDifference = b.Max - aMax
 			return function(alpha)
-				return NumberRange.new(a.Min + minimumDifference*alpha, a.Max + maximumDifference*alpha)
+				return NumberRange.new(
+					aMin + minimumDifference*alpha,
+					aMax + maximumDifference*alpha
+				)
 			end
 		end,
 		

@@ -38,13 +38,14 @@ if userDefaults then
 	end
 end
 
--- Remove falses and zeroes.
+-- Remove falses.
 for key, value in defaults do
 	if value == false then
 		defaults[key] = nil
 	end
 end
 
+-- Remove DelayTime if 0.
 if defaults.DelayTime == 0 then defaults.DelayTime = nil end
 
 -- Invert time.

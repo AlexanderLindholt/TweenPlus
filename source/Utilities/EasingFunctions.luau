@@ -318,5 +318,5 @@ return {
 		Out = outBounce,
 		InOut = inOutBounce,
 		OutIn = outInBounce,
-	},
+	}
 }

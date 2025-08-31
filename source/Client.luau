@@ -363,10 +363,10 @@ if packets then
 					if easingStyle == "Linear" then easingFunctions.Linear else easingFunctions[easingStyle][options[3]]
 				else
 					easingFunctions.Linear,
-				DelayTime = options[4] or defaults.DelayTime,
-				Reverses = options[5] or defaults.Reverses,
-				RepeatCount = options[6] or defaults.RepeatCount,
-				Interval = options[7] or defaults.Interval,
+					DelayTime = options[4] or defaults.DelayTime,
+					Reverses = options[5] or defaults.Reverses,
+					RepeatCount = options[6] or defaults.RepeatCount,
+					Interval = options[7] or defaults.Interval,
 				
 				-- Time markers.
 				StartTime = 0,

@@ -12,7 +12,7 @@
      ====           ======    ======      ========================   ====     ======        :::     
      ====            ====      ====       ========================   ====       ====                
 
-v2.4.0
+v2.5.0
 
 An open-source tweening library for Roblox, featuring advanced
 datatypes, customization, interpolation, and optimization.
@@ -64,15 +64,15 @@ type Signal = types.Signal
 export type Tween = {
 	Start: typeof(
 		-- Starts or resumes playback.
-		function(tween: Tween) end
+		function(tween: Tween): Tween end
 	),
 	Stop: typeof(
 		-- Stops playback.
-		function(tween: Tween) end
+		function(tween: Tween): Tween end
 	),
 	Reset: typeof(
 		-- Stops playback, and resets to strting values.
-		function(tween: Tween) end
+		function(tween: Tween): Tween end
 	),
 	Destroy: typeof(
 		-- Stops playback, and erases all related data and methods, making the tween unusable.
