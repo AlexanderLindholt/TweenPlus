@@ -9,6 +9,7 @@
   * [Supported datatypes](creation/introduction/supported-datatypes.md)
 * [Attributes](creation/attributes.md)
 * [Hidden properties](creation/attributes-1.md)
+* [Signals](creation/signals.md)
 
 ***
 

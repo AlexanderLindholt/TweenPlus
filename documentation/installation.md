@@ -36,18 +36,7 @@ Modules are usually located in ReplicatedStorage. It's highly recommended to put
 
 ## Dependencies
 
-It's required to install the following for Tween+ to work:\
-
-
-### Signal
-
-Install a signal library of choice.
-
-{% hint style="info" %}
-[Signal+](https://devforum.roblox.com/t/3552231) is highly recommended for performance.
-{% endhint %}
-
-It's crucial that you give the module the [tag](https://create.roblox.com/docs/studio/properties#instance-tags) `Signal`, so that Tween+ can identify it.
+It's required to install the following libraries for Tween+ to function:
 
 
 
@@ -65,4 +54,4 @@ It's crucial that you give the module the [tag](https://create.roblox.com/docs/s
 
 
 
-You can now start using Tween+!
+**You can now start using Tween+!**
