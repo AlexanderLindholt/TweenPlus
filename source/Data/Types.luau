@@ -41,6 +41,11 @@ export type Signal<Parameters...> = {
 export type InternalTween = {
 	Index: number?,
 	
+	Updated: Signal?,
+	Started: Signal?,
+	Stopped: Signal?,
+	Completed: Signal?,
+	
 	Instance: Instance,
 	Values: Values,
 	

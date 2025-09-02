@@ -1,3 +1,6 @@
+--!optimize 2
+--!native
+
 -- Services.
 local CollectionService = game:GetService("CollectionService")
 local ServerStorage = game:GetService("ServerStorage")
@@ -23,7 +26,7 @@ end
 if #tweenPackets ~= #requiredPackets then
 	if #tweenPackets > 0 and RunService:IsStudio() then
 		for _, name in requiredPackets do
-			if not tweenPackets[name] then warn("Packet '"..name.."' is missing for server tweening to work.") end
+			if not tweenPackets[name] then warn("Packet '"..name.."' is missing for server tweening to function.") end
 		end
 	end
 	error("Missing packets for server tweening to work.")
@@ -34,16 +37,17 @@ local players = CollectionService:GetTagged("PlayerList")[1]
 if not players then error("Could not find a player-list module.") end
 players = require(players)
 
--- Signal library.
-local Signal = CollectionService:GetTagged("Signal")[1]
-if not Signal then error("Could not find a signal module.") end
-Signal = require(Signal)
-if type(Signal) == "table" and Signal.new then Signal = Signal.new end
-
 -- Roblox API map.
 local apiMap = CollectionService:GetTagged("APIMap")[1]
 if not apiMap then error("Could not find APIMap module.") end
 apiMap = require(apiMap)
+
+-- Signal library.
+local Signal = CollectionService:GetTagged("Signal")[1]
+if Signal then
+	Signal = require(Signal)
+	if type(Signal) == "table" and Signal.new then Signal = Signal.new end
+end
 
 -- Directories.
 local root = script.Parent
@@ -53,8 +57,8 @@ local utilities = root.Utilities
 -- Easing functions.
 local easingFunctions = require(utilities.EasingFunctions)
 
--- Updation functions.
-local getUpdateFunctions = require(utilities.UpdateFunctions)
+-- Updation functions constructor.
+local createUpdateFunctions = require(utilities.UpdateFunctions)
 
 -- Option defaults.
 local defaults = require(data.Defaults)
@@ -71,14 +75,9 @@ type InternalTween = types.InternalTween & {
 	
 	PlayerConnection: Signal,
 	DestroyConnection: Signal,
-	
-	Updated: Signal<number>,
-	Started: Signal,
-	Stopped: Signal,
-	Completed: Signal,
 }
 
--- Quick access to packets.
+-- Localize packets.
 local loadedPacket = packets.Loaded
 local createTweenPacket = packets.CreateTween
 local startTweenPacket = packets.StartTween
@@ -329,17 +328,16 @@ return function(instance, values, options)
 	-- Argument errors.
 	if typeof(instance) ~= "Instance" then error("No instance provided.", 2) end
 	if type(values) ~= "table" or not next(values) then error("No values provided.", 2) end
+	if type(options) ~= "table" or not next(options) then error("Invalid options.", 2) end
 	
 	-- Get and verify identifier.
 	local identifier = next(identifiers)
 	if not identifier then error("Maximum server tweens (256) exceeded. Destroy tweens to free up space.", 2) end
 	
 	-- Handle values.
-	local updateFunctions, resetFunctions = getUpdateFunctions(apiMap, instance, values)
+	local updateFunctions, resetFunctions = createUpdateFunctions(apiMap, instance, values)
 	
 	-- Handle options.
-	if type(options) ~= "table" then options = {} end
-	
 	local optionsForClients = {}
 	
 	local tweenTime = options.Time

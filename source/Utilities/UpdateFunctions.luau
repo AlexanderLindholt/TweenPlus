@@ -1,3 +1,6 @@
+--!optimize 2
+--!native
+
 -- Value functions.
 local valueFunctions = require(script.Parent.ValueFunctions)
 
@@ -10,7 +13,7 @@ return function(apiMap, instance, values)
 	local classProperties = apiMap[instance.ClassName] :: {
 		[string]: {
 			Type: string,
-			Writable: boolean
+			Locked: boolean
 		}
 	}
 	if not classProperties then error("Could not identify the class of instance '"..instance:GetFullName().."'.", 3) end
@@ -59,7 +62,7 @@ return function(apiMap, instance, values)
 				local property = classProperties[name]
 				if not property then error("'"..name.."' is not a valid property of '"..instance:GetFullName().."'.", 3) end
 				
-				if not property.Writable then error("'"..name.."' is not a writable property.", 3) end
+				if property.Locked then error("'"..name.."' is a locked property.", 3) end
 				
 				value = normalValueFunctions[typeof(destination)]
 				if not value then error("'"..typeof(destination).."' data type is not supported.", 3) end

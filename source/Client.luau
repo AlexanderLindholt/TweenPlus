@@ -1,3 +1,6 @@
+--!optimize 2
+--!native
+
 -- Services.
 local CollectionService = game:GetService("CollectionService")
 local RunService = game:GetService("RunService")
@@ -5,25 +8,7 @@ local RunService = game:GetService("RunService")
 -- Attempt to find the plugin object.
 local plugin = script:FindFirstAncestorOfClass("Plugin")
 
--- Signal library.
-local Signal
-if plugin then
-	for _, instance in plugin:GetDescendants() do
-		if instance:HasTag("Signal") then
-			Signal = require(instance)
-			if type(Signal) == "table" and Signal.new then Signal = Signal.new end
-			break
-		end
-	end
-	if not Signal then error("Could not find a signal library.") end
-else
-	Signal = CollectionService:GetTagged("Signal")[1]
-	if not Signal then error("Could not find a signal library.") end
-	Signal = require(Signal)
-	if type(Signal) == "table" and Signal.new then Signal = Signal.new end
-end
-
--- Network packets and Roblox API map.
+-- Network packets and API map.
 local packets, apiMap
 if plugin then
 	for _, instance in plugin:GetDescendants() do
@@ -41,6 +26,24 @@ else -- Game context.
 	apiMap = packets.GetAPIMap:Fire()
 end
 
+-- Signal library.
+local Signal
+if plugin then
+	for _, instance in plugin:GetDescendants() do
+		if instance:HasTag("Signal") then
+			Signal = require(instance)
+			if type(Signal) == "table" and Signal.new then Signal = Signal.new end
+			break
+		end
+	end
+else
+	Signal = CollectionService:GetTagged("Signal")[1]
+	if Signal then
+		Signal = require(Signal)
+		if type(Signal) == "table" and Signal.new then Signal = Signal.new end
+	end
+end
+
 -- Directories.
 local root = script.Parent
 local data = root.Data
@@ -49,8 +52,8 @@ local utilities = root.Utilities
 -- Easing functions.
 local easingFunctions = require(utilities.EasingFunctions)
 
--- Updation functions.
-local getUpdateFunctions = require(utilities.UpdateFunctions)
+-- Update functions constructor.
+local createUpdateFunctions = require(utilities.UpdateFunctions)
 
 -- Options defaults.
 local defaults = require(data.Defaults)
@@ -58,16 +61,8 @@ local defaults = require(data.Defaults)
 -- Shared types.
 local types = require(data.Types)
 
--- Signal type.
-type Signal = types.Signal
-
 -- Internal tween type.
-type InternalTween = types.InternalTween & {
-	Updated: Signal<number>?,
-	Started: Signal?,
-	Stopped: Signal?,
-	Completed: Signal?,
-}
+type InternalTween = types.InternalTween
 
 -- Active tweens collection.
 local tweens: {InternalTween} = {}
@@ -114,14 +109,16 @@ local function destroy(tween: InternalTween)
 		end
 		
 		-- Fire stopped signal.
-		tween.Stopped:Fire()
+		if Signal then tween.Stopped:Fire() end
 	end
 	
 	-- Destroy signals.
-	tween.Updated:Destroy()
-	tween.Started:Destroy()
-	tween.Stopped:Destroy()
-	tween.Completed:Destroy()
+	if Signal then
+		tween.Updated:Destroy()
+		tween.Started:Destroy()
+		tween.Stopped:Destroy()
+		tween.Completed:Destroy()
+	end
 	-- Clear tween data.
 	table.clear(tween)
 	-- Unlink methods.
@@ -189,9 +186,13 @@ do
 			local phaseCompleted = alpha >= 1
 			
 			if phaseCompleted then
-				if tween.Reverse then alpha = 0 else alpha = 1 end
-				
-				for _, update in tween.UpdateFunctions do update(alpha) end
+				if tween.Reverse then
+					alpha = 0
+					for _, reset in tween.ResetFunctions do reset() end
+				else
+					alpha = 1
+					for _, update in tween.UpdateFunctions do update(1) end
+				end
 			else
 				if tween.Reverse then alpha = 1 - alpha end
 				
@@ -265,19 +266,19 @@ Tween.__index = Tween
 Tween.Start = function(tween: InternalTween)
 	if not tween.StopTime then return tween end
 	start(tween)
-	tween.Started:Fire()
+	if Signal then tween.Started:Fire() end
 	return tween
 end
 Tween.Stop = function(tween: InternalTween)
 	if tween.StopTime then return tween end
 	stop(tween)
-	tween.Stopped:Fire()
+	if Signal then tween.Stopped:Fire() end
 	return tween
 end
 Tween.Reset = function(tween: InternalTween)
 	if not tween.StopTime then
 		stop(tween)
-		tween.Stopped:Fire()
+		if Signal then tween.Stopped:Fire() end
 	end
 	tween.WaitTime = nil
 	tween.StopTime = 0
@@ -289,7 +290,7 @@ Tween.Reset = function(tween: InternalTween)
 end
 Tween.Destroy = destroy
 
--- Server tweening.
+-- Server tweening setup.
 if packets then
 	local requiredPackets = {
 		"CreateTween",
@@ -338,7 +339,7 @@ if packets then
 			if not instance then if RunService:IsStudio() then error("Could not find instance on client.") end return end
 			
 			-- Handle values.
-			local updateFunctions, resetFunctions = getUpdateFunctions(apiMap, instance, values)
+			local updateFunctions, resetFunctions = createUpdateFunctions(apiMap, instance, values)
 			
 			-- Create tween.
 			local easingStyle = options[2]
@@ -363,10 +364,10 @@ if packets then
 					if easingStyle == "Linear" then easingFunctions.Linear else easingFunctions[easingStyle][options[3]]
 				else
 					easingFunctions.Linear,
-					DelayTime = options[4] or defaults.DelayTime,
-					Reverses = options[5] or defaults.Reverses,
-					RepeatCount = options[6] or defaults.RepeatCount,
-					Interval = options[7] or defaults.Interval,
+				DelayTime = options[4] or defaults.DelayTime,
+				Reverses = options[5] or defaults.Reverses,
+				RepeatCount = options[6] or defaults.RepeatCount,
+				Interval = options[7] or defaults.Interval,
 				
 				-- Time markers.
 				StartTime = 0,
@@ -418,12 +419,6 @@ if packets then
 			
 			serverDestroy(tween)
 		end)
-	else
-		if #tweenPackets > 0 and RunService:IsStudio() then
-			for _, name in requiredPackets do
-				if not tweenPackets[name] then warn("Packet '"..name.."' is missing for server tweening to work.") end
-			end
-		end
 	end
 end
 
@@ -432,13 +427,12 @@ return function(instance, values, options)
 	-- Argument errors.
 	if typeof(instance) ~= "Instance" then error("Invalid instance.", 2) end
 	if type(values) ~= "table" or not next(values) then error("Invalid values.", 2) end
+	if type(options) ~= "table" or not next(options) then error("Invalid options.", 2) end
 	
 	-- Handle values.
-	local updateFunctions, resetFunctions = getUpdateFunctions(apiMap, instance, values)
+	local updateFunctions, resetFunctions = createUpdateFunctions(apiMap, instance, values)
 	
 	-- Handle options.
-	if type(options) ~= "table" then options = {} end
-	
 	local tweenTime = options.Time
 	if type(tweenTime) ~= "number" then
 		tweenTime = defaults.InverseTime
@@ -503,10 +497,10 @@ return function(instance, values, options)
 		end),
 		
 		-- Signals.
-		Updated = Signal(),
-		Started = Signal(),
-		Stopped = Signal(),
-		Completed = Signal(),
+		Updated = if Signal then Signal() else nil,
+		Started = if Signal then Signal() else nil,
+		Stopped = if Signal then Signal() else nil,
+		Completed = if Signal then Signal() else nil,
 		
 		-- Main arguments.
 		Instance = instance,
