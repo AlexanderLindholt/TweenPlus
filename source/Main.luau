@@ -12,7 +12,7 @@
      ====           ======    ======      ========================   ====     ======        :::     
      ====            ====      ====       ========================   ====       ====                
 
-v2.6.0
+v2.6.1
 
 An open-source tweening library for Roblox, featuring advanced
 datatypes, customization, interpolation, and optimization.
