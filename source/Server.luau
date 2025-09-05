@@ -35,7 +35,7 @@ end
 -- Ready players table.
 local players = CollectionService:GetTagged("PlayerList")[1]
 if not players then error("Could not find a player-list module.") end
-players = require(players)()
+players = require(players)
 
 -- Roblox API map.
 local apiMap = CollectionService:GetTagged("APIMap")[1]
