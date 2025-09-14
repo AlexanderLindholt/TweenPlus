@@ -63,13 +63,9 @@ local createUpdateFunctions = require(utilities.UpdateFunctions)
 -- Option defaults.
 local defaults = require(data.Defaults)
 
--- Shared types.
+-- Types.
 local types = require(data.Types)
-
--- Signal type.
 type Signal = types.Signal
-
--- Internal tween type.
 type InternalTween = types.InternalTween & {
 	Identifier: number,
 	
@@ -122,7 +118,7 @@ local function stop(tween: InternalTween)
 	tween.StopTime = time()
 	
 	-- Fire stopped signal.
-	tween.Stopped:Fire()
+	if Signal then tween.Stopped:Fire() end
 end
 local function destroy(tween: InternalTween)
 	-- Disconnect new player connection.
@@ -135,7 +131,7 @@ local function destroy(tween: InternalTween)
 	identifiers[tween.Identifier] = true
 	
 	-- Ensure no playback.
-	if not tween.StopTime then
+	if tween.Playing then
 		-- Update instance values.
 		local alpha = tween.Ease(tween.Alpha)
 		for _, update in tween.UpdateFunctions do
@@ -155,14 +151,16 @@ local function destroy(tween: InternalTween)
 		end
 		
 		-- Fire stopped signal.
-		tween.Stopped:Fire()
+		if Signal then tween.Stopped:Fire() end
 	end
 	
 	-- Destroy signals.
-	tween.Updated:Destroy()
-	tween.Started:Destroy()
-	tween.Stopped:Destroy()
-	tween.Completed:Destroy()
+	if Signal then
+		tween.Updated:Destroy()
+		tween.Started:Destroy()
+		tween.Stopped:Destroy()
+		tween.Completed:Destroy()
+	end
 	-- Unlink methods.
 	setmetatable(tween, nil)
 end
@@ -201,7 +199,11 @@ RunService.PostSimulation:Connect(function()
 		tween.Alpha = alpha
 		
 		-- Fire update signal.
-		tween.Updated:Fire()
+		if Signal then
+			-- Rest assured it's a local tween because it has signals.
+			tween.Alpha = alpha
+			tween.Updated:Fire()
+		end
 		
 		-- Phase completion stuff.
 		if phaseCompleted then
@@ -214,7 +216,10 @@ RunService.PostSimulation:Connect(function()
 				else
 					if not tween.StopTime then
 						stop(tween)
-						tween.Completed:Fire()
+						if Signal then
+							tween.Stopped:Fire()
+							tween.Completed:Fire()
+						end
 					end
 				end
 			else -- Not going in reverse.
@@ -232,7 +237,10 @@ RunService.PostSimulation:Connect(function()
 					else
 						if not tween.StopTime then
 							stop(tween)
-							tween.Completed:Fire()
+							if Signal then
+								tween.Stopped:Fire()
+								tween.Completed:Fire()
+							end
 						end
 					end
 				end
@@ -249,54 +257,59 @@ Tween.Start = function(tween: InternalTween)
 	-- Verify playback state.
 	if tween.Playing then return tween end
 	
-	-- Set playing state.
-	tween.Playing = true
-	
-	-- Handle conflicts.
-	local instance = tween.Instance
-	local values = tween.Values
-	
-	for _, otherTween in tweens do
-		if otherTween.Instance ~= instance then continue end
-		
-		for valueName in otherTween.Values do
-			if values[valueName] then
-				stop(otherTween)
-				break
-			end
-		end
-	end
-	
-	-- Set time markers.
-	local stopDuration = time() - tween.StopTime
-	tween.StartTime += stopDuration
-	if tween.Interval then tween.LastUpdate = -math.huge end
-	if tween.WaitTime then tween.WaitTime += stopDuration end
-	tween.StopTime = nil
-	
 	-- Notify clients.
 	for _, player in players do
 		startTweenPacket:FireClient(player, tween.Identifier)
 	end
 	
+	-- Set playing state.
+	tween.Playing = true
+	
+	-- Handle cross tween conflicts.
+	local instance = tween.Instance
+	local values = tween.Values
+	
+	for _, otherTween in tweens do
+		if otherTween.Instance == instance then
+			local otherValues = otherTween.Values
+			for value in values do
+				if otherValues[value] ~= nil then
+					if otherTween.Playing then
+						stop(otherTween)
+					end
+					break
+				end
+			end
+		end
+	end
+	
+	-- Set time markers.
+	local currentTime = time()
+	local stopDuration = currentTime - tween.StopTime
+	tween.StartTime += stopDuration
+	if tween.Interval then tween.LastUpdate = currentTime end
+	if tween.WaitTime then tween.WaitTime += stopDuration end
+	tween.StopTime = nil
+	
 	-- Add tween.
-	table.insert(tweens, tween)
-	tween.Index = #tweens
+	local tweensAmount = #tweens
+	tweens[tweensAmount] = tween
+	tween.Index = tweensAmount
 	
 	-- Fire started signal.
-	tween.Started:Fire()
+	if Signal then tween.Started:Fire() end
 	
 	-- Return self.
 	return tween
 end
 Tween.Stop = function(tween: InternalTween)
-	if tween.StopTime then return tween end
-	
-	for _, player in players do
-		stopTweenPacket:FireClient(player, tween.Identifier)
+	if tween.Playing then
+		for _, player in players do
+			stopTweenPacket:FireClient(player, tween.Identifier)
+		end
+		
+		stop(tween)
 	end
-	
-	stop(tween)
 	return tween
 end
 Tween.Reset = function(tween: InternalTween)
@@ -304,13 +317,14 @@ Tween.Reset = function(tween: InternalTween)
 		resetTweenPacket:FireClient(player, tween.Identifier)
 	end
 	
-	if not tween.StopTime then stop(tween) end
+	if tween.Playing then stop(tween) end
 	tween.WaitTime = nil
 	tween.StopTime = 0
 	tween.StartTime = 0
 	tween.Repetitions = 0
 	tween.Reverse = nil
 	for _, reset in tween.ResetFunctions do reset() end
+	
 	return tween
 end
 Tween.Destroy = function(tween: InternalTween)
@@ -406,7 +420,7 @@ return function(instance, values, options)
 		interval = defaults.Interval
 	end
 	
-	-- Notify all clients.
+	-- Notify clients.
 	local replicate = options.Replicate
 	if replicate ~= false then 
 		for _, player in players do
@@ -417,6 +431,9 @@ return function(instance, values, options)
 	-- Create tween.
 	local tween
 	tween = setmetatable({
+		-- Identifier.
+		Identifier = identifier,
+		
 		-- Handle instance destroy.
 		DestroyConnection = instance.Destroying:Connect(function()
 			destroy(tween)
@@ -429,9 +446,6 @@ return function(instance, values, options)
 				startTweenPacket:FireClient(player, identifier, time() - tween.StartTime, tween.Repetitions)
 			end
 		end) else nil,
-		
-		-- Identifier.
-		Identifier = identifier,
 		
 		-- Signals.
 		Updated = Signal(),

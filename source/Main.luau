@@ -12,7 +12,7 @@
      ====           ======    ======      ========================   ====     ======        :::     
      ====            ====      ====       ========================   ====       ====                
 
-v2.7.0
+v2.8.0
 
 An open-source tweening library for Roblox, featuring advanced
 datatypes, customization, interpolation, and optimization.
@@ -77,7 +77,7 @@ export type Tween = {
 	Destroy: typeof(
 		-- Stops playback, and erases the tween internally.
 		-- Does not erase exposed data.
-		-- <strong>Please also remove all references to the tween to fully erase.</strong>
+		-- <strong>To fully erase, also remove all references to the tween.</strong>
 		function(tween: Tween) end
 	),
 	

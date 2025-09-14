@@ -63,10 +63,8 @@ local createUpdateFunctions = require(utilities.UpdateFunctions)
 -- Options defaults.
 local defaults = require(data.Defaults)
 
--- Shared types.
+-- Types.
 local types = require(data.Types)
-
--- Internal tween type.
 type InternalTween = types.InternalTween
 
 -- Active tweens collection.
@@ -74,9 +72,6 @@ local tweens: {InternalTween} = {}
 
 -- Tween functions.
 local function stop(tween: InternalTween)
-	-- Verify playback state.
-	if not tween.Playing then return end
-	
 	-- Set playing state.
 	tween.Playing = nil
 	
@@ -135,32 +130,37 @@ local function start(tween: InternalTween, startOverride)
 	-- Set playing state.
 	tween.Playing = true
 	
-	-- Handle conflicts.
+	-- Handle cross tween conflicts.
 	local instance = tween.Instance
 	local values = tween.Values
 	
 	for _, otherTween in tweens do
-		if otherTween.Instance ~= instance then continue end
-		
-		for value in otherTween.Values do
-			if values[value] then
-				stop(otherTween)
-				if otherTween.Stopped then otherTween.Stopped:Fire() end
-				break
+		if otherTween.Instance == instance then
+			local otherValues = otherTween.Values
+			for value in values do
+				if otherValues[value] ~= nil then
+					if otherTween.Playing then
+						stop(otherTween)
+						if otherTween.Stopped then otherTween.Stopped:Fire() end
+					end
+					break
+				end
 			end
 		end
 	end
 	
 	-- Set time markers.
-	local stopDuration = getTime() - tween.StopTime
+	local currentTime = getTime()
+	local stopDuration = currentTime - tween.StopTime
 	if not startOverride then tween.StartTime += stopDuration end
-	if tween.Interval then tween.LastUpdate = -math.huge end
+	if tween.Interval then tween.LastUpdate = currentTime end
 	if tween.WaitTime then tween.WaitTime += stopDuration end
 	tween.StopTime = nil
 	
 	-- Add tween.
-	table.insert(tweens, tween)
-	tween.Index = #tweens
+	local tweensAmount = #tweens
+	tweens[tweensAmount] = tween
+	tween.Index = tweensAmount
 end
 
 -- Setup tween processing.
@@ -267,19 +267,21 @@ local Tween = {}
 Tween.__index = Tween
 
 Tween.Start = function(tween: InternalTween)
-	if not tween.StopTime then return tween end
-	start(tween)
-	if Signal then tween.Started:Fire() end
+	if not tween.Playing then
+		start(tween)
+		if Signal then tween.Started:Fire() end
+	end
 	return tween
 end
 Tween.Stop = function(tween: InternalTween)
-	if tween.StopTime then return tween end
-	stop(tween)
-	if Signal then tween.Stopped:Fire() end
+	if tween.Playing then
+		stop(tween)
+		if Signal then tween.Stopped:Fire() end
+	end
 	return tween
 end
 Tween.Reset = function(tween: InternalTween)
-	if not tween.StopTime then
+	if tween.Playing then
 		stop(tween)
 		if Signal then tween.Stopped:Fire() end
 	end
@@ -317,7 +319,7 @@ if packets then
 			serverTweens[tween.Identifier] = nil
 			
 			-- Ensure no playback.
-			if not tween.StopTime then
+			if tween.Playing then
 				-- Tween removal.
 				local lastIndex = #tweens
 				local index = tween.Index
@@ -346,6 +348,9 @@ if packets then
 			local easingStyle = options[2]
 			local tween
 			tween = {
+				-- Identifier.
+				Identifier = identifier,
+				
 				-- Handle instance destroy.
 				DestroyConnection = instance.Destroying:Connect(function()
 					serverDestroy(tween)
@@ -405,13 +410,13 @@ if packets then
 			local tween = serverTweens[identifier]
 			if not tween then return end
 			
-			if not tween.StopTime then stop(tween) end
+			if tween.Playing then stop(tween) end
 		end)
 		packets.ResetTween.OnClientEvent:Connect(function(identifier)
 			local tween = serverTweens[identifier]
 			if not tween then return end
 			
-			if not tween.StopTime then stop(tween) end
+			if tween.Playing then stop(tween) end
 			for _, reset in tween.ResetFunctions do reset() end
 		end)
 		packets.DestroyTween.OnClientEvent:Connect(function(identifier)
