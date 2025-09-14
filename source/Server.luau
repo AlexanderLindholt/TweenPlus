@@ -292,9 +292,9 @@ Tween.Start = function(tween: InternalTween)
 	tween.StopTime = nil
 	
 	-- Add tween.
-	local tweensAmount = #tweens
-	tweens[tweensAmount] = tween
-	tween.Index = tweensAmount
+	local index = #tweens + 1
+	tweens[index] = tween
+	tween.Index = index
 	
 	-- Fire started signal.
 	if Signal then tween.Started:Fire() end
