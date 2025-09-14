@@ -119,7 +119,7 @@ local function stop(tween: InternalTween)
 	end
 	
 	-- Set time markers.
-	tween.StopTime = os.clock()
+	tween.StopTime = time()
 	
 	-- Fire stopped signal.
 	tween.Stopped:Fire()
@@ -163,8 +163,6 @@ local function destroy(tween: InternalTween)
 	tween.Started:Destroy()
 	tween.Stopped:Destroy()
 	tween.Completed:Destroy()
-	-- Clear tween data.
-	table.clear(tween)
 	-- Unlink methods.
 	setmetatable(tween, nil)
 end
@@ -173,7 +171,7 @@ end
 RunService.PostSimulation:Connect(function()
 	if #tweens == 0 then return end
 	
-	local currentTime = os.clock()
+	local currentTime = time()
 	for _, tween in tweens do
 		-- Ensure desired interval (specified in FPS).
 		if tween.Interval then
@@ -194,9 +192,9 @@ RunService.PostSimulation:Connect(function()
 		local phaseCompleted = alpha >= 1
 		
 		if phaseCompleted then
-			alpha = if tween.Reverse then 0 else 1
+			alpha = if tween.Reverse then 0 else 1 -- Force the value to ensure it doesn't exceed the range 0-1.
 		else
-			if tween.Reverse then alpha = 1 - alpha end
+			if tween.Reverse then alpha = 1 - alpha end -- Reverse alpha to match, if going in reverse.
 		end
 		
 		-- Save alpha.
@@ -270,7 +268,7 @@ Tween.Start = function(tween: InternalTween)
 	end
 	
 	-- Set time markers.
-	local stopDuration = os.clock() - tween.StopTime
+	local stopDuration = time() - tween.StopTime
 	tween.StartTime += stopDuration
 	if tween.Interval then tween.LastUpdate = -math.huge end
 	if tween.WaitTime then tween.WaitTime += stopDuration end
@@ -428,7 +426,7 @@ return function(instance, values, options)
 		PlayerConnection = if replicate ~= false then loadedPacket.OnServerEvent:Connect(function(player)
 			createTweenPacket:FireClient(player, identifier, instance, values, optionsForClients)
 			if not tween.StopTime then
-				startTweenPacket:FireClient(player, identifier, os.clock() - tween.StartTime, tween.Repetitions)
+				startTweenPacket:FireClient(player, identifier, time() - tween.StartTime, tween.Repetitions)
 			end
 		end) else nil,
 		

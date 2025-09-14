@@ -23,7 +23,9 @@ else -- Game context.
 	if not packets then error("Could not find packets module.") end
 	packets = require(packets)
 	
-	apiMap = packets.GetAPIMap:Fire()
+	apiMap = CollectionService:GetTagged("APIMap")[1]
+	if not apiMap then error("Could not find APIMap module") end
+	apiMap = require(apiMap)
 end
 
 -- Signal library.
@@ -43,6 +45,9 @@ else
 		if type(Signal) == "table" and Signal.new then Signal = Signal.new end
 	end
 end
+
+-- Time function.
+local getTime = if plugin then os.clock else time
 
 -- Directories.
 local root = script.Parent
@@ -88,7 +93,7 @@ local function stop(tween: InternalTween)
 	end
 	
 	-- Set time markers.
-	tween.StopTime = os.clock()
+	tween.StopTime = getTime()
 end
 local function destroy(tween: InternalTween)
 	-- Disconnect destroy connection.
@@ -119,8 +124,6 @@ local function destroy(tween: InternalTween)
 		tween.Stopped:Destroy()
 		tween.Completed:Destroy()
 	end
-	-- Clear tween data.
-	table.clear(tween)
 	-- Unlink methods.
 	setmetatable(tween, nil)
 end
@@ -149,7 +152,7 @@ local function start(tween: InternalTween, startOverride)
 	end
 	
 	-- Set time markers.
-	local stopDuration = os.clock() - tween.StopTime
+	local stopDuration = getTime() - tween.StopTime
 	if not startOverride then tween.StartTime += stopDuration end
 	if tween.Interval then tween.LastUpdate = -math.huge end
 	if tween.WaitTime then tween.WaitTime += stopDuration end
@@ -165,7 +168,7 @@ do
 	local connection = (if plugin then RunService.Heartbeat else RunService.PreSimulation):Connect(function()
 		if #tweens == 0 then return end
 		
-		local currentTime = os.clock()
+		local currentTime = getTime()
 		for _, tween in tweens do
 			-- Ensure desired interval (specified in FPS).
 			if tween.Interval then
@@ -188,13 +191,13 @@ do
 			if phaseCompleted then
 				if tween.Reverse then
 					alpha = 0
-					for _, reset in tween.ResetFunctions do reset() end
+					for _, reset in tween.ResetFunctions do reset() end -- Reset is equivelant to updating to alpha 0, but faster due to lack of interpolation.
 				else
 					alpha = 1
 					for _, update in tween.UpdateFunctions do update(1) end
 				end
 			else
-				if tween.Reverse then alpha = 1 - alpha end
+				if tween.Reverse then alpha = 1 - alpha end -- Reverse alpha to match, if going in reverse.
 				
 				local easedAlpha = tween.Ease(alpha)
 				for _, update in tween.UpdateFunctions do update(easedAlpha) end
@@ -203,7 +206,7 @@ do
 			-- Save alpha and fire update signal.
 			local updateSignal = tween.Updated
 			if updateSignal then
-				-- Now we know it's a local tween because it has signals.
+				-- Rest assured it's a local tween because it has signals.
 				tween.Alpha = alpha
 				updateSignal:Fire()
 			end
@@ -328,8 +331,6 @@ if packets then
 				end
 			end
 			
-			-- Clear tween data.
-			table.clear(tween)
 			-- Unlink methods.
 			setmetatable(tween, nil)
 		end
@@ -393,7 +394,7 @@ if packets then
 			end
 			if tween.StopTime then
 				if runTime then
-					tween.StartTime = os.clock() - runTime
+					tween.StartTime = getTime() - runTime
 					start(tween, true)
 				else
 					start(tween)

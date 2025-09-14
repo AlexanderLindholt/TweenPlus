@@ -4,13 +4,13 @@
 -- Elastic constants.
 local elasticInP = 0.3
 local elasticInA = 1.0
-local elasticInS = elasticInP/4
+local elasticInS = elasticInP*0.25
 local elasticOutP = 0.3
 local elasticOutA = 1.0
-local elasticOutS = elasticOutP/4
+local elasticOutS = elasticOutP*0.25
 local elasticInOutP = 0.45
 local elasticInOutA = 1.0
-local elasticInOutS = elasticInOutP/4
+local elasticInOutS = elasticInOutP*0.25
 
 -- Back constants.
 local backS = 1.70158
@@ -173,7 +173,7 @@ end
 -- Elastic easing.
 local function inElastic(alpha)
 	local s = if elasticInA < 1 then
-		elasticInP/4
+		elasticInP*0.25
 	else
 		elasticInP/(2*math.pi)*math.asin(1/elasticInA)
 	local t = alpha - 1
@@ -181,14 +181,14 @@ local function inElastic(alpha)
 end
 local function outElastic(alpha)
 	local s = if elasticOutA < 1 then
-		elasticOutP/4
+		elasticOutP*0.25
 	else
 		elasticOutP/(2*math.pi)*math.asin(1/elasticOutA)
 	return elasticOutA*2^(-10*alpha)*math.sin((alpha - s)*(2*math.pi/elasticOutP)) + 1
 end
 local function inOutElastic(alpha)
 	local s = if elasticInOutA < 1 then
-		elasticInOutP/4
+		elasticInOutP*0.25
 	else
 		elasticInOutP/(2*math.pi)*math.asin(1/elasticInOutA)
 	alpha *= 2

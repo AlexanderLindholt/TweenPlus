@@ -141,7 +141,6 @@ local function colorLerper(a, b)
 	local l1, a1, b1 = rgbToOklab(a.R, a.G, a.B)
 	local l2, a2, b2 = rgbToOklab(b.R, b.G, b.B)
 	return function(alpha)
-		if alpha == 0 then return a end
 		if alpha == 1 then return b end
 		
 		local r, g, b = oklabToRGB(
@@ -290,7 +289,6 @@ return {
 			
 			-- Interpolation function.
 			return function(alpha)
-				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
 				-- Position lerp.
@@ -373,7 +371,6 @@ return {
 			local suffix = if suffixLen > 0 then a:sub(-suffixLen) else ""
 			
 			return function(alpha)
-				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
 				local aVisible = math.floor(#aMiddle*(1 - alpha) + 0.5)
@@ -431,7 +428,6 @@ return {
 			end
 			
 			return function(alpha)
-				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
 				local keypoints = {}
@@ -451,7 +447,7 @@ return {
 			for index, keypoint in a.Keypoints do
 				uniqueTimes[index] = keypoint.Time
 			end
-			for _, keypoint in b.Keypoints do
+			for index, keypoint in b.Keypoints do
 				table.insert(uniqueTimes, keypoint.Time)
 			end
 			table.sort(uniqueTimes)
@@ -462,7 +458,6 @@ return {
 			end
 			
 			return function(alpha)
-				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
 				local keypoints = {}
