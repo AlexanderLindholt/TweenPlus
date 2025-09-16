@@ -69,6 +69,7 @@ type InternalTween = types.InternalTween
 
 -- Active tweens collection.
 local tweens: {InternalTween} = {}
+local tweensAmount = 0
 
 -- Tween functions.
 local function stop(tween: InternalTween)
@@ -76,16 +77,16 @@ local function stop(tween: InternalTween)
 	tween.Playing = nil
 	
 	-- Tween removal.
-	local lastIndex = #tweens
 	local index = tween.Index
-	if index == lastIndex then
-		tweens[lastIndex] = nil
+	if index == tweensAmount then
+		tweens[tweensAmount] = nil
 	else
-		local last = tweens[lastIndex]
+		local last = tweens[tweensAmount]
 		last.Index = index
 		tweens[index] = last
-		tweens[lastIndex] = nil
+		tweens[tweensAmount] = nil
 	end
+	tweensAmount -= 1
 	
 	-- Set time markers.
 	tween.StopTime = getTime()
@@ -97,16 +98,16 @@ local function destroy(tween: InternalTween)
 	-- Ensure no playback.
 	if tween.Playing then
 		-- Tween removal.
-		local lastIndex = #tweens
 		local index = tween.Index
-		if index == lastIndex then
-			tweens[lastIndex] = nil
+		if index == tweensAmount then
+			tweens[tweensAmount] = nil
 		else
-			local last = tweens[lastIndex]
+			local last = tweens[tweensAmount]
 			last.Index = index
 			tweens[index] = last
-			tweens[lastIndex] = nil
+			tweens[tweensAmount] = nil
 		end
+		tweensAmount -= 1
 		
 		-- Fire stopped signal.
 		if Signal then tween.Stopped:Fire() end
@@ -158,9 +159,9 @@ local function start(tween: InternalTween, startOverride)
 	tween.StopTime = nil
 	
 	-- Add tween.
-	local index = #tweens + 1
-	tweens[index] = tween
-	tween.Index = index
+	tweensAmount += 1
+	tweens[tweensAmount] = tween
+	tween.Index = tweensAmount
 end
 
 -- Setup tween processing.
@@ -309,7 +310,9 @@ if packets then
 		if packets[name] then table.insert(tweenPackets, name) end
 	end
 	if #tweenPackets == #requiredPackets then
-		local serverTweens = table.create(256) -- Preallocate the maximum amount of tweens.
+		requiredPackets, tweenPackets = nil
+		
+		local serverTweens = table.create(256) -- Preallocate the maximum amount of server tweens.
 		
 		local function serverDestroy(tween: InternalTween)
 			-- Disconnect destroy connection.
@@ -321,16 +324,16 @@ if packets then
 			-- Ensure no playback.
 			if tween.Playing then
 				-- Tween removal.
-				local lastIndex = #tweens
 				local index = tween.Index
-				if index == lastIndex then
-					tweens[lastIndex] = nil
+				if index == tweensAmount then
+					tweens[tweensAmount] = nil
 				else
-					local last = tweens[lastIndex]
+					local last = tweens[tweensAmount]
 					last.Index = index
 					tweens[index] = last
-					tweens[lastIndex] = nil
+					tweens[tweensAmount] = nil
 				end
+				tweensAmount -= 1
 			end
 			
 			-- Unlink methods.
@@ -339,7 +342,7 @@ if packets then
 		
 		packets.CreateTween.OnClientEvent:Connect(function(identifier, instance, values, options)
 			-- Argument errors.
-			if not instance then if RunService:IsStudio() then error("Could not find instance on client.") end return end
+			if not instance then error("Could not find instance on client.") end
 			
 			-- Handle values.
 			local updateFunctions, resetFunctions = createUpdateFunctions(apiMap, instance, values)
@@ -432,8 +435,8 @@ end
 return function(instance, values, options)
 	-- Argument errors.
 	if typeof(instance) ~= "Instance" then error("Invalid instance.", 2) end
-	if type(values) ~= "table" or not next(values) then error("Invalid values.", 2) end
-	if type(options) ~= "table" or not next(options) then error("Invalid options.", 2) end
+	if type(values) ~= "table" then error("Invalid values.", 2) end
+	if type(options) ~= "table" then error("Invalid options.", 2) end
 	
 	-- Handle values.
 	local updateFunctions, resetFunctions = createUpdateFunctions(apiMap, instance, values)
@@ -502,12 +505,6 @@ return function(instance, values, options)
 			destroy(tween)
 		end),
 		
-		-- Signals.
-		Updated = if Signal then Signal() else nil,
-		Started = if Signal then Signal() else nil,
-		Stopped = if Signal then Signal() else nil,
-		Completed = if Signal then Signal() else nil,
-		
 		-- Main arguments.
 		Instance = instance,
 		Values = values,
@@ -532,6 +529,14 @@ return function(instance, values, options)
 		Repetitions = 0,
 		Alpha = 0
 	}, Tween)
+	
+	-- Signals.
+	if Signal then
+		tween.Updated = Signal()
+		tween.Started = Signal()
+		tween.Stopped = Signal()
+		tween.Completed = Signal()
+	end
 	
 	-- Return tween.
 	return tween

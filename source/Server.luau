@@ -12,24 +12,26 @@ local packets = CollectionService:GetTagged("Packets")[1]
 if not packets then error("Could not find packets module.") end
 packets = require(packets)
 
-local requiredPackets = {
-	"CreateTween",
-	"StartTween",
-	"StopTween",
-	"ResetTween",
-	"DestroyTween"
-}
-local tweenPackets = {}
-for _, name in requiredPackets do
-	if packets[name] then table.insert(tweenPackets, name) end
-end
-if #tweenPackets ~= #requiredPackets then
-	if #tweenPackets > 0 and RunService:IsStudio() then
-		for _, name in requiredPackets do
-			if not tweenPackets[name] then warn("Packet '"..name.."' is missing for server tweening to function.") end
-		end
+do
+	local requiredPackets = {
+		"CreateTween",
+		"StartTween",
+		"StopTween",
+		"ResetTween",
+		"DestroyTween"
+	}
+	local tweenPackets = {}
+	for _, name in requiredPackets do
+		if packets[name] then table.insert(tweenPackets, name) end
 	end
-	error("Missing packets for server tweening to work.")
+	if #tweenPackets ~= #requiredPackets then
+		if #tweenPackets > 0 and RunService:IsStudio() then
+			for _, name in requiredPackets do
+				if not tweenPackets[name] then warn("Packet '"..name.."' is missing for server tweening to function.") end
+			end
+		end
+		error("Missing packets for server tweening to work.")
+	end
 end
 
 -- Ready players table.
@@ -88,7 +90,8 @@ for identifier = 0, 255, 1 do
 end
 
 -- Active tweens collection.
-local tweens: {InternalTween} = table.create(256)
+local tweens: {InternalTween} = {}
+local tweensAmount = 0
 
 -- Tween functions.
 local function stop(tween: InternalTween)
@@ -103,16 +106,16 @@ local function stop(tween: InternalTween)
 	for _, update in tween.UpdateFunctions do update(alpha) end
 	
 	-- Tween removal.
-	local lastIndex = #tweens
 	local index = tween.Index
-	if index == lastIndex then
-		tweens[lastIndex] = nil
+	if index == tweensAmount then
+		tweens[tweensAmount] = nil
 	else
-		local last = tweens[lastIndex]
+		local last = tweens[tweensAmount]
 		last.Index = index
 		tweens[index] = last
-		tweens[lastIndex] = nil
+		tweens[tweensAmount] = nil
 	end
+	tweensAmount -= 1
 	
 	-- Set time markers.
 	tween.StopTime = time()
@@ -139,16 +142,16 @@ local function destroy(tween: InternalTween)
 		end
 		
 		-- Tween removal.
-		local lastIndex = #tweens
 		local index = tween.Index
-		if index == lastIndex then
-			tweens[lastIndex] = nil
+		if index == tweensAmount then
+			tweens[tweensAmount] = nil
 		else
-			local last = tweens[lastIndex]
+			local last = tweens[tweensAmount]
 			last.Index = index
 			tweens[index] = last
-			tweens[lastIndex] = nil
+			tweens[tweensAmount] = nil
 		end
+		tweensAmount -= 1
 		
 		-- Fire stopped signal.
 		if Signal then tween.Stopped:Fire() end
@@ -274,9 +277,7 @@ Tween.Start = function(tween: InternalTween)
 			local otherValues = otherTween.Values
 			for value in values do
 				if otherValues[value] ~= nil then
-					if otherTween.Playing then
-						stop(otherTween)
-					end
+					if otherTween.Playing then stop(otherTween) end
 					break
 				end
 			end
@@ -292,9 +293,9 @@ Tween.Start = function(tween: InternalTween)
 	tween.StopTime = nil
 	
 	-- Add tween.
-	local index = #tweens + 1
-	tweens[index] = tween
-	tween.Index = index
+	tweensAmount += 1
+	tweens[tweensAmount] = tween
+	tween.Index = tweensAmount
 	
 	-- Fire started signal.
 	if Signal then tween.Started:Fire() end
@@ -338,13 +339,16 @@ end
 -- Tween creation.
 return function(instance, values, options)
 	-- Argument errors.
-	if typeof(instance) ~= "Instance" then error("No instance provided.", 2) end
-	if type(values) ~= "table" or not next(values) then error("No values provided.", 2) end
-	if type(options) ~= "table" or not next(options) then error("Invalid options.", 2) end
+	if typeof(instance) ~= "Instance" then error("Invalid instance.", 2) end
+	if type(values) ~= "table" then error("Invalid values.", 2) end
+	if type(options) ~= "table" then error("Invalid options.", 2) end
 	
 	-- Get and verify identifier.
-	local identifier = next(identifiers)
-	if not identifier then error("Maximum server tweens (256) exceeded. Destroy tweens to free up space.", 2) end
+	local identifier
+	if options.Replicate ~= false then
+		identifier = next(identifiers)
+		if not identifier then error("Maximum global tweens (256) exceeded. Destroy tweens to free up space.", 2) end
+	end
 	
 	-- Handle values.
 	local updateFunctions, resetFunctions = createUpdateFunctions(apiMap, instance, values)
@@ -421,8 +425,7 @@ return function(instance, values, options)
 	end
 	
 	-- Notify clients.
-	local replicate = options.Replicate
-	if replicate ~= false then 
+	if identifier then
 		for _, player in players do
 			createTweenPacket:FireClient(player, identifier, instance, values, optionsForClients)
 		end
@@ -440,18 +443,12 @@ return function(instance, values, options)
 		end),
 		
 		-- New player handling.
-		PlayerConnection = if replicate ~= false then loadedPacket.OnServerEvent:Connect(function(player)
+		PlayerConnection = if identifier then loadedPacket.OnServerEvent:Connect(function(player)
 			createTweenPacket:FireClient(player, identifier, instance, values, optionsForClients)
 			if not tween.StopTime then
 				startTweenPacket:FireClient(player, identifier, time() - tween.StartTime, tween.Repetitions)
 			end
 		end) else nil,
-		
-		-- Signals.
-		Updated = Signal(),
-		Started = Signal(),
-		Stopped = Signal(),
-		Completed = Signal(),
 		
 		-- Main arguments.
 		Instance = instance,
@@ -478,10 +475,13 @@ return function(instance, values, options)
 		Alpha = 0
 	}, Tween)
 	
-	-- Handle instance destroy.
-	instance.Destroying:Connect(function()
-		destroy(tween)
-	end)
+	-- Signals.
+	if Signal then
+		tween.Updated = Signal()
+		tween.Started = Signal()
+		tween.Stopped = Signal()
+		tween.Completed = Signal()
+	end
 	
 	-- Return tween.
 	return tween
