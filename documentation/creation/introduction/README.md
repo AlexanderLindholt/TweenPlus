@@ -1,19 +1,17 @@
 # Introduction
 
-When you require the module, it will return a function, which you can use to create tweens.\
-Example:
+When you require the module, it will return a function, which you can use to create tweens:
 
 ```lua
 local Tween = require(script.TweenPlus)
 
 local tween = Tween(
 	workspace.Part, -- Instance to tween.
-	{} -- Properties to tween.
+	{} -- Values to tween.
 )
 ```
 
-You simply input all the properties you would like to tween.\
-Example:
+You simply input all the values you would like to tween:
 
 ```lua
 local tween = Tween(
@@ -25,3 +23,9 @@ local tween = Tween(
 	}
 )
 ```
+
+
+
+{% hint style="warning" %}
+In game context, make sure to require the APIMap module on the server, otherwise Tween+ won't function.
+{% endhint %}

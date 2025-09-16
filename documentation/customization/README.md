@@ -4,10 +4,10 @@ icon: ballot
 
 # Options
 
-The customization works with a table, where you can provide any customizations you want.\
-You don’t have to provide all, or even any, because they all have defaults.
+The options is a table, where you may provide any options you like.\
+You are not required to provide all, or even any, as all options have defaults.
 
-You use it like this:
+Example options:
 
 ```lua
 local tween = Tween(
@@ -16,7 +16,7 @@ local tween = Tween(
 		Position = Vector3.new(0, 10, 0),
 		Color = Color3.fromRGB(255, 255, 0)
 	},
-	{ -- Customization (optional).
+	{ -- Options (optional).
 		Time = 10,
 		EasingStyle = "Sine",
 		EasingDirection = "InOut"
