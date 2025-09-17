@@ -4,10 +4,8 @@ The Roblox server is limited to 60 FPS, and sending large amounts of data every 
 
 The solution is to synchronize tween data between the server and client. Instead of sending the tween's output, the server only shares the internal tween parameters — such as those provided via an API like Tween+. Whenever the server creates, plays, resets, stops, or destroys a tween, it notifies the client with the necessary details.
 
-This approach minimizes what the server has to do, and ensures smooth tweens on all clients.
+This approach minimizes what server's workload, and helps achieve smooth tweens on all clients.
 
-But the server still needs to track tween states to handle cases like players joining mid-tween. Additionally, server code might expect the tween output to match the client's. Instead of actually tweening on the server, we can update the relevant values only when a tween stops or reaches the end or start. This way, the server stays in sync enough for most cases, while avoiding constant updates. Unfortunately it is not optimal to actually tween on the server due to Roblox's automatic replication — if we ever get the ability to disable replication for certain instances, it would be possible to tween fully on the server as well.
+But the server still has to keep track of tween states to handle cases like players joining mid-tween. Additionally, server code might expect the tween output to match the client's. Instead of actually tweening on the server, we can update the relevant values only when a tween stops or reaches the start/finish. This way, the server stays in sync enough for most cases, while avoiding constant updates. Unfortunately it's not optimal to fully tween on the server due to Roblox's automatic replication — _if Roblox ever decides to allow you to toggle their automatic replication, or if you're working in a different engine that already allows for this, you can safely tween properly on the server_.
 
-The client will of course have to do the hard work itself. But that's exactly what we want. You see, this way, server (global) tweens will appear as smooth on every client as local tweens.
-
-This technique ultimately reduces server and network usage by a lot, while also making tweens smoother for the clients. The only downside is the server not actually ever playing the tween — but depending on how you look at it, that can be seen as an advantage.
+While this method increases the client's workload, it also greatly reduces server and network usage, and keeps tweens smooth for the players.

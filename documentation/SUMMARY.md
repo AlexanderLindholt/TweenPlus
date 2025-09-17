@@ -31,7 +31,7 @@
 * [Introduction](networking/introduction.md)
 * [Network library](networking/network-library.md)
 * [Packets](networking/packets.md)
-* [Server tweening](networking/server-tweening.md)
+* [Global tweening](networking/server-tweening.md)
 * [How it works](networking/how-it-works/README.md)
   * [Let the client do it](networking/how-it-works/let-the-client-do-it.md)
   * [Re-use data](networking/how-it-works/re-use-data.md)
