@@ -83,10 +83,10 @@ local stopTweenPacket = packets.StopTween
 local resetTweenPacket = packets.ResetTween
 local destroyTweenPacket = packets.DestroyTween
 
--- Store all possible tween identifiers.
-local identifiers = {}
+-- Store all possible global tween identifiers.
+local globalIdentifiers = table.create(256)
 for identifier = 0, 255, 1 do
-	identifiers[identifier] = true
+	globalIdentifiers[identifier] = true
 end
 
 -- Active tweens collection.
@@ -131,7 +131,7 @@ local function destroy(tween: InternalTween)
 	tween.DestroyConnection:Disconnect()
 	
 	-- Free up identifier.
-	identifiers[tween.Identifier] = true
+	globalIdentifiers[tween.Identifier] = true
 	
 	-- Ensure no playback.
 	if tween.Playing then
@@ -344,10 +344,10 @@ return function(instance, values, options)
 	if type(options) ~= "table" then error("Invalid options.", 2) end
 	
 	-- Get and verify identifier.
-	local identifier
+	local globalIdentifier
 	if options.Replicate ~= false then
-		identifier = next(identifiers)
-		if not identifier then error("Maximum global tweens (256) exceeded. Destroy tweens to free up space.", 2) end
+		globalIdentifier = next(globalIdentifiers)
+		if not globalIdentifier then error("Maximum global tweens (256) exceeded. Destroy tweens to free up space.", 2) end
 	end
 	
 	-- Handle values.
@@ -425,9 +425,9 @@ return function(instance, values, options)
 	end
 	
 	-- Notify clients.
-	if identifier then
+	if globalIdentifier then
 		for _, player in players do
-			createTweenPacket:FireClient(player, identifier, instance, values, optionsForClients)
+			createTweenPacket:FireClient(player, globalIdentifier, instance, values, optionsForClients)
 		end
 	end
 	
@@ -435,7 +435,7 @@ return function(instance, values, options)
 	local tween
 	tween = setmetatable({
 		-- Identifier.
-		Identifier = identifier,
+		Identifier = globalIdentifier,
 		
 		-- Handle instance destroy.
 		DestroyConnection = instance.Destroying:Connect(function()
@@ -443,10 +443,10 @@ return function(instance, values, options)
 		end),
 		
 		-- New player handling.
-		PlayerConnection = if identifier then loadedPacket.OnServerEvent:Connect(function(player)
-			createTweenPacket:FireClient(player, identifier, instance, values, optionsForClients)
+		PlayerConnection = if globalIdentifier then loadedPacket.OnServerEvent:Connect(function(player)
+			createTweenPacket:FireClient(player, globalIdentifier, instance, values, optionsForClients)
 			if not tween.StopTime then
-				startTweenPacket:FireClient(player, identifier, time() - tween.StartTime, tween.Repetitions)
+				startTweenPacket:FireClient(player, globalIdentifier, time() - tween.StartTime, tween.Repetitions)
 			end
 		end) else nil,
 		

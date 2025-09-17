@@ -42,8 +42,8 @@ return function(apiMap, instance, values)
 			resetFunctions[index] = function()
 				instance:SetAttribute(attributeName, original)
 			end
-		else -- Not attribute.
-			-- Property.
+		else
+			-- Not attribute.
 			local property = classProperties[name]
 			if not property then
 				local value = advancedValueFunctions[name]
@@ -59,11 +59,14 @@ return function(apiMap, instance, values)
 					resetFunctions[index] = function()
 						setValue(0)
 					end
+					
+					continue
 				else
 					error("'"..name.."' is not a valid property of '"..instance:GetFullName().."'.", 3)
 				end
 			end
 			
+			-- Property.
 			if property.Locked then error("'"..name.."' is a locked property.", 3) end
 			
 			local value = normalValueFunctions[typeof(destination)]

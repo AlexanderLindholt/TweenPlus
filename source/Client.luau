@@ -257,6 +257,7 @@ do
 	end)
 	
 	if plugin then
+		-- On plugin unload, connections stay, unlike in games. Therefore we manually erase connections.
 		plugin.Unloading:Connect(function()
 			connection:Disconnect()
 		end)
@@ -310,7 +311,7 @@ if packets then
 		if packets[name] then table.insert(tweenPackets, name) end
 	end
 	if #tweenPackets == #requiredPackets then
-		requiredPackets, tweenPackets = nil
+		requiredPackets, tweenPackets = nil -- Erase unnecessary data.
 		
 		local serverTweens = table.create(256) -- Preallocate the maximum amount of server tweens.
 		

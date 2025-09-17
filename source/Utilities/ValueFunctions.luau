@@ -40,37 +40,92 @@ local function commonSuffix(a, b, prefixLen)
 	return maxLength
 end
 
-local function quaternionFromCFrame(cframe)
+local function normalize(x, y, z, w)
+	local m = math.sqrt(x^2 + y^2 + z^2 + w^2)
+	if m == 0 then return 0, 0, 0, 1 end
+	m = 1/m
+	return x*m, y*m, z*m, w*m
+end
+local function normalizedQuaternionFromCFrame(cframe)
 	local rightVector = cframe.RightVector
 	local upVector = cframe.UpVector
 	local lookVector = cframe.LookVector
 	
 	local rightX, rightY, rightZ = rightVector.X, rightVector.Y, rightVector.Z
 	local upX, upY, upZ = upVector.X, upVector.Y, upVector.Z
-	local leftX, leftY, leftZ = lookVector.X, lookVector.Y, lookVector.Z
+	local leftX, leftY, leftZ = -lookVector.X, -lookVector.Y, -lookVector.Z
 	
 	local trace = rightX + upY + leftZ
 	if trace > 0 then
 		local s = math.sqrt(trace + 1)*2
-		return (upZ - leftY)/s, (leftX - rightZ)/s, (rightY - upX)/s, 0.25*s, cframe.X, cframe.Y, cframe.Z
+		return normalize((upZ - leftY)/s, (leftX - rightZ)/s, (rightY - upX)/s, 0.25*s)
 	end
 	
 	if rightX > upY and rightX > leftZ then
 		local s = math.sqrt(1 + rightX - upY - leftZ)*2
-		return 0.25*s, (upX + rightY)/s, (leftX + rightZ)/s, (upZ - leftY)/s, cframe.X, cframe.Y, cframe.Z
+		return normalize(0.25*s, (upX + rightY)/s, (leftX + rightZ)/s, (upZ - leftY)/s)
 	elseif upY > leftZ then
 		local s = math.sqrt(1 + upY - rightX - leftZ)*2
-		return (upX + rightY)/s, 0.25*s, (upZ + leftY)/s, (leftX - rightZ)/s, cframe.X, cframe.Y, cframe.Z
+		return normalize((upX + rightY)/s, 0.25*s, (upZ + leftY)/s, (leftX - rightZ)/s)
 	else
 		local s = math.sqrt(1 + leftZ - rightX - upY)*2
-		return (leftX + rightZ)/s, (upZ + leftY)/s, 0.25*s, (rightY - upX)/s, cframe.X, cframe.Y, cframe.Z
+		return normalize((leftX + rightZ)/s, (upZ + leftY)/s, 0.25*s, (rightY - upX)/s)
 	end
 end
-local function normalize(x, y, z, w)
-	local m = math.sqrt(x^2 + y^2 + z^2 + w^2)
-	if m == 0 then return 0, 0, 0, 1 end
-	m = 1/m
-	return x*m, y*m, z*m, w*m
+local function cframeLerper(a, b)
+	-- Position stuff.
+	local ax, ay, az = a.X, a.Y, a.Z
+	local bx, by, bz = b.X, b.Y, b.Z
+	local dx, dy, dz = bx - ax, by - ay, bz - az
+	
+	-- Get normalized quaternions.
+	local aqx, aqy, aqz, aqw = normalizedQuaternionFromCFrame(a)
+	local bqx, bqy, bqz, bqw = normalizedQuaternionFromCFrame(b)
+	
+	-- Dot, and shortest path.
+	local dot = aqx*bqx + aqy*bqy + aqz*bqz + aqw*bqw
+	if dot < 0 then
+		dot = -dot
+		bqx, bqy, bqz, bqw = -bqx, -bqy, -bqz, -bqw
+	end
+	
+	-- Slerp precompute.
+	local dotSquared = dot*dot
+	local A = 1.0904 - 3.2452*dot + 3.55645*dotSquared - 1.43519*dotSquared*dot
+	local B = 0.848013 - 1.06021*dot + 0.215638*dotSquared
+	
+	-- Interpolation function.
+	return function(alpha)
+		if alpha == 1 then return b end
+		
+		-- Quaternion lerp.
+		local shiftedAlpha = alpha - 0.5
+		local s1 = (A*shiftedAlpha^2 + B)*(alpha*shiftedAlpha*(alpha - 1)) + alpha
+		local s0 = 1 - s1
+		
+		local rx = s0*aqx + s1*bqx
+		local ry = s0*aqy + s1*bqy
+		local rz = s0*aqz + s1*bqz
+		local rw = s0*aqw + s1*bqw
+		
+		local m = math.sqrt(rx^2 + ry^2 + rz^2 + rw^2)
+		if m ~= 0 then
+			m = 1/m
+			rx, ry, rz, rw = rx*m, ry*m, rz*m, rw*m
+		end
+		
+		-- Build CFrame.
+		return CFrame.new(
+			-- Position.
+			ax + dx*alpha,
+			ay + dy*alpha,
+			az + dz*alpha,
+			-- Matrix.
+			1 - 2*(ry^2 + rz^2), 2*(rx*ry - rw*rz), 2*(rx*rz + rw*ry),
+			2*(rx*ry + rw*rz), 1 - 2*(rx^2 + rz^2), 2*(ry*rz - rw*rx),
+			2*(rx*rz - rw*ry), 2*(ry*rz + rw*rx), 1 - 2*(rx^2 + ry^2)
+		)
+	end
 end
 
 local function rgbToOklab(r, g, b)
@@ -260,81 +315,7 @@ return {
 			end
 		end,
 		
-		CFrame = function(a, b)
-			-- Positions.
-			local ax, ay, az = a.X, a.Y, a.Z
-			local bx, by, bz = b.X, b.Y, b.Z
-			local dx, dy, dz = bx - ax, by - ay, bz - az
-			
-			-- Quaternions (and normalize).
-			local aqx, aqy, aqz, aqw = quaternionFromCFrame(a)
-			local bqx, bqy, bqz, bqw = quaternionFromCFrame(b)
-			aqx, aqy, aqz, aqw = normalize(aqx, aqy, aqz, aqw)
-			bqx, bqy, bqz, bqw = normalize(bqx, bqy, bqz, bqw)
-			
-			-- Dot, and shortest path.
-			local dot = aqx*bqx + aqy*bqy + aqz*bqz + aqw*bqw
-			if dot < 0 then
-				dot = -dot
-				bqx, bqy, bqz, bqw = -bqx, -bqy, -bqz, -bqw
-			end
-			
-			-- Slerp precompute or linear fallback.
-			local useLinear = dot > 0.9995
-			local theta, inverseSine
-			if not useLinear then
-				theta = math.acos(math.clamp(dot, -1, 1))
-				inverseSine = 1/math.sin(theta)
-			end
-			
-			-- Interpolation function.
-			return function(alpha)
-				if alpha == 1 then return b end
-				
-				-- Position lerp.
-				local px = ax + dx*alpha
-				local py = ay + dy*alpha
-				local pz = az + dz*alpha
-				
-				-- Quaternion lerp.
-				local rx, ry, rz, rw
-				if useLinear then
-					local lx = aqx + (bqx - aqx)*alpha
-					local ly = aqy + (bqy - aqy)*alpha
-					local lz = aqz + (bqz - aqz)*alpha
-					local lw = aqw + (bqw - aqw)*alpha
-					local m = math.sqrt(lx^2 + ly^2 + lz^2 + lw^2)
-					if m == 0 then
-						rx, ry, rz, rw = 0, 0, 0, 1
-					else
-						m = 1/m
-						rx, ry, rz, rw = lx*m, ly*m, lz*m, lw*m
-					end
-				else
-					local s0 = math.sin((1 - alpha)*theta)*inverseSine
-					local s1 = math.sin(alpha*theta)*inverseSine
-					rx = s0*aqx + s1*bqx
-					ry = s0*aqy + s1*bqy
-					rz = s0*aqz + s1*bqz
-					rw = s0*aqw + s1*bqw
-					local m = math.sqrt(rx^2 + ry^2 + rz^2 + rw^2)
-					if m ~= 0 then
-						m = 1/m
-						rx, ry, rz, rw = rx*m, ry*m, rz*m, rw*m
-					end
-				end
-				
-				-- Build CFrame.
-				return CFrame.new(
-					-- Position.
-					px, py, pz,
-					-- Matrix.
-					1 - 2*(ry^2 + rz^2), 2*(rx*ry - rw*rz), 2*(rx*rz + rw*ry),
-					2*(rx*ry + rw*rz), 1 - 2*(rx^2 + rz^2),  2*(ry*rz - rw*rx),
-					2*(rx*rz - rw*ry), 2*(ry*rz + rw*rx), 1 - 2*(rx^2 + ry^2)
-				)
-			end
-		end,
+		CFrame = cframeLerper,
 		
 		UDim = function(a, b)
 			local aScale = a.Scale
@@ -478,8 +459,9 @@ return {
 		Pivot = {
 			Target = "PVInstance",
 			Set = function(instance, a, b)
+				local lerp = cframeLerper(a, b)
 				return function(alpha)
-					instance:PivotTo(a:Lerp(b, alpha))
+					instance:PivotTo(lerp(alpha))
 				end
 			end,
 			Get = function(instance)

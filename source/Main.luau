@@ -12,7 +12,7 @@
      ====           ======    ======      ========================   ====     ======        :::     
      ====            ====      ====       ========================   ====       ====                
 
-v2.9.0
+v2.10.0
 
 An open-source tweening library for Roblox, featuring advanced
 datatypes, customization, interpolation, and optimization.
@@ -54,13 +54,10 @@ SOFTWARE.
 -- Services.
 local RunService = game:GetService("RunService")
 
--- Shared types.
+-- Types.
 local types = require(script.Data.Types)
-
--- Signal type.
 type Signal = types.Signal
 
--- Tween types.
 export type Tween = {
 	Start: typeof(
 		-- Starts/resumes playback.
@@ -75,21 +72,21 @@ export type Tween = {
 		function(tween: Tween): Tween end
 	),
 	Destroy: typeof(
-		-- Haults playback & erases the tween internally.
+		-- Halts playback & erases the tween internally.
 		-- <strong>To fully erase, also remove all references to the tween.</strong>
 		-- <br><em>Destroying the instance will automatically call this method.</em> 
 		function(tween: Tween) end
 	),
 	
-	Playing: boolean?,
+	Playing: boolean,
 	Repetitions: number,
-	Reverses: boolean?,
+	Reverses: boolean,
 	Alpha: number,
 	
-	Updated: Signal?,
-	Started: Signal?,
-	Stopped: Signal?,
-	Completed: Signal?
+	Updated: Signal,
+	Started: Signal,
+	Stopped: Signal,
+	Completed: Signal
 }
 export type Options = {
 	Time: number?,
