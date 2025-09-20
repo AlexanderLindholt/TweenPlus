@@ -19,9 +19,9 @@ layout:
 
 The following are properties representing the tween's state:
 
-* **Playing**: boolean?
+* **Playing**: boolean
 * **Repetitions**: number
-* **Reverse**: boolean?
+* **Reverse**: boolean
 * [**Alpha**](#user-content-fn-1)[^1]: number
 
 

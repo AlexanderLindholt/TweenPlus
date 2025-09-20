@@ -17,9 +17,10 @@ layout:
 
 # Replicate
 
-`Replicate` is one of the many customization options.
+`Replicate` is one of the many options.
 
-It expects a boolean.
+The value controls whether or not the tween will be replicated to the clients (players).
 
-The value controls whether or not the tween will be replicated to the clients (players).\
+{% hint style="info" %}
 Useful for internal animations that have no reason to be attempted to be replicated.
+{% endhint %}

@@ -9,4 +9,4 @@ Ah but it's much cooler than that, don't worry!
 
 It's a bunch of clever tricks that work together in harmony to ensure smooth, synced animations, that run on minimal network traffic.
 
-**Let's dive deeper on the next few pages!**
+**Let's dive deeper!**

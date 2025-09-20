@@ -4,7 +4,9 @@ icon: box-archive
 
 # Installation
 
-Let's first get the module. There are two main ways:
+{% stepper %}
+{% step %}
+### Get the module
 
 {% tabs %}
 {% tab title="Creator Store" %}
@@ -24,34 +26,22 @@ Let's first get the module. There are two main ways:
 * Drag the file into Roblox Studio.
 {% endtab %}
 {% endtabs %}
+{% endstep %}
 
-\
-You can then place it wherever you want.
+{% step %}
+### Place it
 
-{% hint style="info" %}
-Modules are usually located in ReplicatedStorage. It's highly recommended to put it there.
-{% endhint %}
+Find a great place for the module, where other scripts can reference it.
+{% endstep %}
 
+{% step %}
+### Install dependencies
 
-
-## Dependencies
-
-It's required to install the following libraries for Tween+ to function:
-
-
-
-### API map
-
-Install [Inxpect](https://devforum.roblox.com/t/3799622), which is an efficient API map builder.\
-It's crucial that you give the module the [tag](https://create.roblox.com/docs/studio/properties#instance-tags) `APIMap`, so that Tween+ can identify it.
-
-
-
-### Ready players list
-
-Install [Players+](https://github.com/AlexanderLindholt/PlayersPlus), which is a simple custom player list that only includes ready clients.\
-It's crucial that you give the module the [tag](https://create.roblox.com/docs/studio/properties#instance-tags) `PlayerList`, so that Tween+ can identify it.
-
-
-
-**You can now start using Tween+!**
+* [Inxpect](https://devforum.roblox.com/t/3799622)\
+  A simple, efficient API map builder.\
+  &#xNAN;_&#x4D;ake sure to_ [_tag_](https://create.roblox.com/docs/studio/properties#instance-tags) _the module `APIMap`._
+* [Players+](https://github.com/AlexanderLindholt/PlayersPlus)\
+  A simple custom player list, which only includes ready clients.\
+  &#xNAN;_&#x4D;ake sure to_ [_tag_](https://create.roblox.com/docs/studio/properties#instance-tags) _the module `PlayerList`._
+{% endstep %}
+{% endstepper %}

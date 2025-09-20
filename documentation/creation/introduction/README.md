@@ -1,6 +1,6 @@
 # Introduction
 
-When you require the module, it will return a function, which you can use to create tweens:
+When you require the module, it'll return a function, which you can use to create tweens:
 
 ```lua
 local Tween = require(script.TweenPlus)

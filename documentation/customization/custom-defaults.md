@@ -33,8 +33,6 @@ return {
 	Reverses = false,
 	RepeatCount = 0,
 	
-	FPS = nil,
-	
-	Update = "PreSimulation"
+	FPS = nil
 }
 ```

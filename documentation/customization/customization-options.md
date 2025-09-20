@@ -2,7 +2,7 @@
 icon: list
 ---
 
-# Customization options
+# Options list
 
 {% hint style="success" %}
 Most of the following defaults can be overwritten by [custom defaults](custom-defaults.md).
@@ -36,11 +36,4 @@ Defaults marked with _<mark style="color:$warning;">**colored bold italic**</mar
   &#xNAN;_&#x44;efault:_ `PreSimulation`\
 
 * **Replicate:** boolean\
-  &#xNAN;_&#x44;efault: <mark style="color:$warning;">**`true`**</mark>_\
-
-
-
-
-
-
-**Some of the options are described in detail on the next few pages.**
+  &#xNAN;_&#x44;efault: <mark style="color:$warning;">**`true`**</mark>_
