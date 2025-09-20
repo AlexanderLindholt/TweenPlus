@@ -18,7 +18,7 @@ layout:
 
 # Signals
 
-For signals to function, you have to install a signal library.
+You can enable signals by installing a signal library.
 
 {% hint style="info" %}
 [Signal+](https://devforum.roblox.com/t/3552231) is highly recommended for performance.
