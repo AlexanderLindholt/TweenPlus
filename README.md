@@ -27,8 +27,8 @@ and many new and amazing features:
   - Pivot.
   - Scale.
 - Framerate limit control.
-- Update event customization.
 - Accurate color interpolation ([Oklab](https://observablehq.com/@aras-p/oklab-interpolation-test)).
+- Beautiful, readable syntax.
 - ***And much more!***
 <br>
 <br>
