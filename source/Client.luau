@@ -68,7 +68,7 @@ local types = require(data.Types)
 type InternalTween = types.InternalTween
 
 -- Active tweens collection.
-local tweens: {InternalTween} = {}
+local tweens: {InternalTween} = table.create(script.Parent:GetAttribute("TweenPreallocations"))
 local tweensAmount = 0
 
 -- Tween functions.
@@ -92,9 +92,6 @@ local function stop(tween: InternalTween)
 	tween.StopTime = getTime()
 end
 local function destroy(tween: InternalTween)
-	-- Disconnect destroy connection.
-	tween.DestroyConnection:Disconnect()
-	
 	-- Ensure no playback.
 	if tween.Playing then
 		-- Tween removal.
@@ -167,7 +164,7 @@ end
 -- Setup tween processing.
 do
 	local connection = (if plugin then RunService.Heartbeat else RunService.PreSimulation):Connect(function()
-		if #tweens == 0 then return end
+		if tweensAmount == 0 then return end
 		
 		local currentTime = getTime()
 		for _, tween in tweens do
@@ -210,6 +207,8 @@ do
 				-- Rest assured it's a local tween because it has signals.
 				tween.Alpha = alpha
 				updateSignal:Fire()
+			else
+				tween.Alpha = alpha
 			end
 			
 			-- Phase completion stuff.
@@ -221,12 +220,10 @@ do
 						tween.StartTime = currentTime
 						tween.Reverse = nil
 					else
-						if not tween.StopTime then
-							stop(tween)
-							if updateSignal then -- If there's one signal, we know there are all of them.
-								tween.Stopped:Fire()
-								tween.Completed:Fire()
-							end
+						stop(tween)
+						if updateSignal then -- If there's one signal, we know there are all of them.
+							tween.Stopped:Fire()
+							tween.Completed:Fire()
 						end
 					end
 				else -- Not going in reverse.
@@ -242,12 +239,10 @@ do
 							if tween.DelayTime then tween.WaitTime = currentTime end
 							tween.StartTime = currentTime
 						else
-							if not tween.StopTime then
-								stop(tween)
-								if updateSignal then -- If there's one signal, we know there are all of them.
-									tween.Stopped:Fire()
-									tween.Completed:Fire()
-								end
+							stop(tween)
+							if updateSignal then -- If there's one signal, we know there are all of them.
+								tween.Stopped:Fire()
+								tween.Completed:Fire()
 							end
 						end
 					end
@@ -257,7 +252,8 @@ do
 	end)
 	
 	if plugin then
-		-- On plugin unload, connections stay, unlike in games. Therefore we manually erase connections.
+		-- On plugin unload, connections stay, unlike in games.
+		-- Therefore, we manually erase connections.
 		plugin.Unloading:Connect(function()
 			connection:Disconnect()
 		end)
@@ -297,7 +293,7 @@ Tween.Reset = function(tween: InternalTween)
 end
 Tween.Destroy = destroy
 
--- Server tweening setup.
+-- Global tweens setup.
 if packets then
 	local requiredPackets = {
 		"CreateTween",
@@ -313,14 +309,11 @@ if packets then
 	if #tweenPackets == #requiredPackets then
 		requiredPackets, tweenPackets = nil -- Erase unnecessary data.
 		
-		local serverTweens = table.create(256) -- Preallocate the maximum amount of server tweens.
+		local globalTweens = table.create(256) -- Preallocate the maximum amount of global tweens.
 		
 		local function serverDestroy(tween: InternalTween)
-			-- Disconnect destroy connection.
-			tween.DestroyConnection:Disconnect()
-			
 			-- Remove from collection.
-			serverTweens[tween.Identifier] = nil
+			globalTweens[tween.Identifier] = nil
 			
 			-- Ensure no playback.
 			if tween.Playing then
@@ -350,15 +343,9 @@ if packets then
 			
 			-- Create tween.
 			local easingStyle = options[2]
-			local tween
-			tween = {
+			local tween = {
 				-- Identifier.
 				Identifier = identifier,
-				
-				-- Handle instance destroy.
-				DestroyConnection = instance.Destroying:Connect(function()
-					serverDestroy(tween)
-				end),
 				
 				-- Main arguments.
 				Instance = instance,
@@ -388,11 +375,16 @@ if packets then
 			}
 			
 			-- Store the tween with its given identifier.
-			serverTweens[identifier] = tween
+			globalTweens[identifier] = tween
+			
+			-- Handle instance destroy.
+			instance.Destroying:Once(function()
+				serverDestroy(tween)
+			end)
 		end)
 		
 		packets.StartTween.OnClientEvent:Connect(function(identifier, runTime, repetitions)
-			local tween = serverTweens[identifier]
+			local tween = globalTweens[identifier]
 			if not tween then return end
 			
 			if repetitions then
@@ -411,20 +403,20 @@ if packets then
 			end
 		end)
 		packets.StopTween.OnClientEvent:Connect(function(identifier)
-			local tween = serverTweens[identifier]
+			local tween = globalTweens[identifier]
 			if not tween then return end
 			
 			if tween.Playing then stop(tween) end
 		end)
 		packets.ResetTween.OnClientEvent:Connect(function(identifier)
-			local tween = serverTweens[identifier]
+			local tween = globalTweens[identifier]
 			if not tween then return end
 			
 			if tween.Playing then stop(tween) end
 			for _, reset in tween.ResetFunctions do reset() end
 		end)
 		packets.DestroyTween.OnClientEvent:Connect(function(identifier)
-			local tween = serverTweens[identifier]
+			local tween = globalTweens[identifier]
 			if not tween then return end
 			
 			serverDestroy(tween)
@@ -499,13 +491,7 @@ return function(instance, values, options)
 	end
 	
 	-- Create tween.
-	local tween
-	tween = setmetatable({
-		-- Handle instance destroy.
-		DestroyConnection = instance.Destroying:Connect(function()
-			destroy(tween)
-		end),
-		
+	local tween = setmetatable({
 		-- Main arguments.
 		Instance = instance,
 		Values = values,
@@ -539,6 +525,11 @@ return function(instance, values, options)
 		tween.Completed = Signal()
 	end
 	
-	-- Return tween.
+	-- Handle instance destroy.
+	instance.Destroying:Once(function()
+		destroy(tween)
+	end)
+	
+	-- Return tween object.
 	return tween
 end

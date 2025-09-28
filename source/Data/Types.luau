@@ -41,6 +41,8 @@ export type Signal<Parameters...> = {
 export type InternalTween = {
 	Index: number?,
 	
+	Playing: boolean,
+	
 	Updated: Signal?,
 	Started: Signal?,
 	Stopped: Signal?,
@@ -55,7 +57,7 @@ export type InternalTween = {
 	InverseTweenTime: number,
 	Ease: (alpha: number) -> (),
 	RepeatCount: number,
-	Reverses: boolean?,
+	Reverses: boolean,
 	Interval: number?,
 	Table: {},
 	
@@ -65,7 +67,7 @@ export type InternalTween = {
 	LastUpdate: number?,
 	
 	Repetitions: number,
-	Reverse: boolean?,
+	Reverse: boolean,
 	Alpha: number
 }
 

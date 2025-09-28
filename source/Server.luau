@@ -71,8 +71,7 @@ type Signal = types.Signal
 type InternalTween = types.InternalTween & {
 	Identifier: number,
 	
-	PlayerConnection: Signal,
-	DestroyConnection: Signal,
+	PlayerConnection: Signal
 }
 
 -- Localize packets.
@@ -90,7 +89,7 @@ for identifier = 0, 255, 1 do
 end
 
 -- Active tweens collection.
-local tweens: {InternalTween} = {}
+local tweens: {InternalTween} = table.create(script.Parent:GetAttribute("TweenPreallocations"))
 local tweensAmount = 0
 
 -- Tween functions.
@@ -170,7 +169,7 @@ end
 
 -- Setup tween processing.
 RunService.PostSimulation:Connect(function()
-	if #tweens == 0 then return end
+	if tweensAmount == 0 then return end
 	
 	local currentTime = time()
 	for _, tween in tweens do
@@ -217,12 +216,10 @@ RunService.PostSimulation:Connect(function()
 					tween.StartTime = currentTime
 					tween.Reverse = nil
 				else
-					if not tween.StopTime then
-						stop(tween)
-						if Signal then
-							tween.Stopped:Fire()
-							tween.Completed:Fire()
-						end
+					stop(tween)
+					if Signal then
+						tween.Stopped:Fire()
+						tween.Completed:Fire()
 					end
 				end
 			else -- Not going in reverse.
@@ -238,12 +235,10 @@ RunService.PostSimulation:Connect(function()
 						if tween.DelayTime then tween.WaitTime = currentTime end
 						tween.StartTime = currentTime
 					else
-						if not tween.StopTime then
-							stop(tween)
-							if Signal then
-								tween.Stopped:Fire()
-								tween.Completed:Fire()
-							end
+						stop(tween)
+						if Signal then
+							tween.Stopped:Fire()
+							tween.Completed:Fire()
 						end
 					end
 				end
@@ -437,15 +432,10 @@ return function(instance, values, options)
 		-- Identifier.
 		Identifier = globalIdentifier,
 		
-		-- Handle instance destroy.
-		DestroyConnection = instance.Destroying:Connect(function()
-			destroy(tween)
-		end),
-		
 		-- New player handling.
 		PlayerConnection = if globalIdentifier then loadedPacket.OnServerEvent:Connect(function(player)
 			createTweenPacket:FireClient(player, globalIdentifier, instance, values, optionsForClients)
-			if not tween.StopTime then
+			if tween.Playing then
 				startTweenPacket:FireClient(player, globalIdentifier, time() - tween.StartTime, tween.Repetitions)
 			end
 		end) else nil,
@@ -483,6 +473,11 @@ return function(instance, values, options)
 		tween.Completed = Signal()
 	end
 	
-	-- Return tween.
+	-- Handle instance destroy.
+	instance.Destroying:Once(function()
+		destroy(tween)
+	end)
+	
+	-- Return tween object.
 	return tween
 end

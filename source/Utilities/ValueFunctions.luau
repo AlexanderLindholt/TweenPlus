@@ -3,45 +3,14 @@
 
 local function numberLerper(a, b)
 	local difference = b - a
+	
 	return function(alpha)
 		return a + difference*alpha
 	end
 end
 
-local function commonPrefix(a, b)
-	local aLength = utf8.len(a)
-	local bLength = utf8.len(b)
-	local minLength = if aLength < bLength then aLength else bLength
-	
-	for index = 1, minLength, 1 do
-		local aPosition = utf8.offset(a, index)
-		local bPosition = utf8.offset(b, index)
-		
-		if utf8.codepoint(a, aPosition) ~= utf8.codepoint(b, bPosition) then
-			return index - 1
-		end
-	end
-	return minLength
-end
-
-local function commonSuffix(a, b, prefixLen)
-	local aLength = utf8.len(a)
-	local bLength = utf8.len(b)
-	local maxLength = if aLength < bLength then aLength - prefixLen else bLength - prefixLen
-	
-	for index = 1, maxLength, 1 do
-		local aPosition = utf8.offset(a, -index)
-		local bPosition = utf8.offset(b, -index)
-		
-		if utf8.codepoint(a, aPosition) ~= utf8.codepoint(b, bPosition) then
-			return index - 1
-		end
-	end
-	return maxLength
-end
-
 local function normalize(x, y, z, w)
-	local m = math.sqrt(x^2 + y^2 + z^2 + w^2)
+	local m = math.sqrt(x*x + y*y + z*z + w*w)
 	if m == 0 then return 0, 0, 0, 1 end
 	m = 1/m
 	return x*m, y*m, z*m, w*m
@@ -100,7 +69,7 @@ local function cframeLerper(a, b)
 		
 		-- Quaternion lerp.
 		local shiftedAlpha = alpha - 0.5
-		local s1 = (A*shiftedAlpha^2 + B)*(alpha*shiftedAlpha*(alpha - 1)) + alpha
+		local s1 = (A*shiftedAlpha*shiftedAlpha + B)*(alpha*shiftedAlpha*(alpha - 1)) + alpha
 		local s0 = 1 - s1
 		
 		local rx = s0*aqx + s1*bqx
@@ -108,7 +77,7 @@ local function cframeLerper(a, b)
 		local rz = s0*aqz + s1*bqz
 		local rw = s0*aqw + s1*bqw
 		
-		local m = math.sqrt(rx^2 + ry^2 + rz^2 + rw^2)
+		local m = math.sqrt(rx*rx + ry*ry + rz*rz + rw*rw)
 		if m ~= 0 then
 			m = 1/m
 			rx, ry, rz, rw = rx*m, ry*m, rz*m, rw*m
@@ -121,9 +90,9 @@ local function cframeLerper(a, b)
 			ay + dy*alpha,
 			az + dz*alpha,
 			-- Matrix.
-			1 - 2*(ry^2 + rz^2), 2*(rx*ry - rw*rz), 2*(rx*rz + rw*ry),
-			2*(rx*ry + rw*rz), 1 - 2*(rx^2 + rz^2), 2*(ry*rz - rw*rx),
-			2*(rx*rz - rw*ry), 2*(ry*rz + rw*rx), 1 - 2*(rx^2 + ry^2)
+			1 - 2*(ry*ry + rz*rz), 2*(rx*ry - rw*rz), 2*(rx*rz + rw*ry),
+			2*(rx*ry + rw*rz), 1 - 2*(rx*rx + rz*rz), 2*(ry*rz - rw*rx),
+			2*(rx*rz - rw*ry), 2*(ry*rz + rw*rx), 1 - 2*(rx*rx + ry^2)
 		)
 	end
 end
@@ -140,9 +109,9 @@ local function rgbToOklab(r, g, b)
 	local s = 0.0883024619*r + 0.2817188376*g + 0.6299787005*b
 	
 	-- Cube roots.
-	l = l^0.3333333333333333
-	m = m^0.3333333333333333
-	s = s^0.3333333333333333
+	l = l^(1/3)
+	m = m^(1/3)
+	s = s^(1/3)
 	
 	-- Return l, a, b.
 	return 
@@ -191,7 +160,6 @@ local function oklabToRGB(l, a, b)
 	-- Return r, g, b.
 	return r, g, b
 end
-
 local function colorLerper(a, b)
 	local l1, a1, b1 = rgbToOklab(a.R, a.G, a.B)
 	local l2, a2, b2 = rgbToOklab(b.R, b.G, b.B)
@@ -223,7 +191,6 @@ local function findKeypoints(source, targetTime)
 	end
 	return high, low
 end
-
 local function getNumberKeypoint(sequence, time)
 	local keypoints = sequence.Keypoints
 	local index1, index2 = findKeypoints(keypoints, time)
@@ -256,6 +223,37 @@ local function getColorKeypoint(sequence, time)
 	return a.Value:Lerp(b.Value, alpha)
 end
 
+local function commonPrefix(a, b)
+	local aLength = utf8.len(a)
+	local bLength = utf8.len(b)
+	local minLength = if aLength < bLength then aLength else bLength
+	
+	for index = 1, minLength, 1 do
+		local aPosition = utf8.offset(a, index)
+		local bPosition = utf8.offset(b, index)
+		
+		if utf8.codepoint(a, aPosition) ~= utf8.codepoint(b, bPosition) then
+			return index - 1
+		end
+	end
+	return minLength
+end
+local function commonSuffix(a, b, prefixLen)
+	local aLength = utf8.len(a)
+	local bLength = utf8.len(b)
+	local maxLength = if aLength < bLength then aLength - prefixLen else bLength - prefixLen
+	
+	for index = 1, maxLength, 1 do
+		local aPosition = utf8.offset(a, -index)
+		local bPosition = utf8.offset(b, -index)
+		
+		if utf8.codepoint(a, aPosition) ~= utf8.codepoint(b, bPosition) then
+			return index - 1
+		end
+	end
+	return maxLength
+end
+
 return {
 	Normal = {
 		number = numberLerper,
@@ -267,6 +265,7 @@ return {
 			local xDifference = b.X - aX
 			local yDifference = b.Y - aY
 			local zDifference = b.Z - aZ
+			
 			return function(alpha)
 				return vector.create(
 					aX + xDifference*alpha,
@@ -307,6 +306,7 @@ return {
 			local aY = a.Y
 			local xDifference = b.X - aX
 			local yDifference = b.Y - aY
+			
 			return function(alpha)
 				return Vector2.new(
 					aX + xDifference*alpha,
@@ -322,6 +322,7 @@ return {
 			local aOffset = a.Offset
 			local scaleDifference = b.Scale - aScale
 			local offsetDifference = b.Offset - aOffset
+			
 			return function(alpha)
 				return UDim.new(
 					aScale + scaleDifference*alpha,
@@ -337,19 +338,19 @@ return {
 		end,
 		
 		string = function(a, b)
-			local prefixLen = commonPrefix(a, b)
-			local suffixLen = commonSuffix(a, b, prefixLen)
+			local prefixLength = commonPrefix(a, b)
+			local suffixLength = commonSuffix(a, b, prefixLength)
 			
-			local aMiddleStart = prefixLen + 1
-			local aMiddleEnd = #a - suffixLen
-			local bMiddleStart = prefixLen + 1
-			local bMiddleEnd = #b - suffixLen
+			local aMiddleStart = prefixLength + 1
+			local aMiddleEnd = #a - suffixLength
+			local bMiddleStart = prefixLength + 1
+			local bMiddleEnd = #b - suffixLength
 			
 			local aMiddle = if aMiddleStart <= aMiddleEnd then a:sub(aMiddleStart, aMiddleEnd) else ""
 			local bMiddle = if bMiddleStart <= bMiddleEnd then b:sub(bMiddleStart, bMiddleEnd) else ""
 			
-			local prefix = a:sub(1, prefixLen)
-			local suffix = if suffixLen > 0 then a:sub(-suffixLen) else ""
+			local prefix = a:sub(1, prefixLength)
+			local suffix = if suffixLength > 0 then a:sub(-suffixLength) else ""
 			
 			return function(alpha)
 				if alpha == 1 then return b end
@@ -367,7 +368,7 @@ return {
 				if bVisible > 0 then
 					result ..= bMiddle:sub(1, bVisible)
 				end
-				if suffixLen > 0 then
+				if suffixLength > 0 then
 					result ..= suffix
 				end
 				return result
@@ -381,6 +382,7 @@ return {
 			local aMax = a.Max
 			local minimumDifference = b.Min - aMin
 			local maximumDifference = b.Max - aMax
+			
 			return function(alpha)
 				return NumberRange.new(
 					aMin + minimumDifference*alpha,
@@ -460,6 +462,7 @@ return {
 			Target = "PVInstance",
 			Set = function(instance, a, b)
 				local lerp = cframeLerper(a, b)
+				
 				return function(alpha)
 					instance:PivotTo(lerp(alpha))
 				end
@@ -473,6 +476,7 @@ return {
 			Target = "Model",
 			Set = function(instance, a, b)
 				local difference = b - a
+				
 				return function(alpha)
 					instance:ScaleTo(a + difference*alpha)
 				end
@@ -483,7 +487,7 @@ return {
 		}
 	} :: {
 		{
-			Set: (instance: Instance, a: any, b: any) -> (alpha: number) -> any,
+			Set: (instance: Instance, a: any, b: any) -> ((alpha: number) -> any),
 			Get: (instance: Instance) -> any
 		}
 	}
