@@ -1,3 +1,20 @@
+---
+layout:
+  width: default
+  title:
+    visible: true
+  description:
+    visible: false
+  tableOfContents:
+    visible: false
+  outline:
+    visible: true
+  pagination:
+    visible: true
+  metadata:
+    visible: true
+---
+
 # Outroduction
 
 If you're interested in learning more, you can view the Tween+ source code on [GitHub](https://github.com/AlexanderLindholt/TweenPlus) at any time. That way you can see exactly how everything works.

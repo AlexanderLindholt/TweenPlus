@@ -1,3 +1,20 @@
+---
+layout:
+  width: default
+  title:
+    visible: true
+  description:
+    visible: false
+  tableOfContents:
+    visible: false
+  outline:
+    visible: true
+  pagination:
+    visible: true
+  metadata:
+    visible: true
+---
+
 # Playback and control
 
 After creating a new tween, you can use the following methods:
@@ -9,7 +26,7 @@ After creating a new tween, you can use the following methods:
 
 
 
-Example:
+Example usage:
 
 ```lua
 local tween = Tween(workspace.Part, {Transparency = 1}, {Time = 2})

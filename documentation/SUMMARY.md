@@ -9,15 +9,12 @@
   * [Supported datatypes](creation/introduction/supported-datatypes.md)
 * [Attributes](creation/attributes.md)
 * [Hidden properties](creation/attributes-1.md)
-* [Signals](creation/signals.md)
-
-***
-
-* [Options](customization/README.md)
-  * [Options list](customization/customization-options.md)
-  * [FPS](customization/fps.md)
-  * [Replicate](customization/replicate.md)
-  * [Custom defaults](customization/custom-defaults.md)
+* [Options](creation/customization/README.md)
+  * [Options list](creation/customization/customization-options.md)
+  * [FPS](creation/customization/fps.md)
+  * [Replicate](creation/customization/replicate.md)
+  * [Custom defaults](creation/customization/custom-defaults.md)
+* [Preallocations](creation/preallocations.md)
 
 ## Tween  usage
 

@@ -1,6 +1,35 @@
+---
+layout:
+  width: default
+  title:
+    visible: true
+  description:
+    visible: false
+  tableOfContents:
+    visible: false
+  outline:
+    visible: true
+  pagination:
+    visible: true
+  metadata:
+    visible: true
+---
+
 # Signals
 
-After creating a new tween, you can listen to the following signals:
+You can enable signals by installing a signal library.
+
+{% hint style="info" %}
+[Signal+](https://devforum.roblox.com/t/3552231) is highly recommended for performance.
+{% endhint %}
+
+Makes sure to [tag](https://create.roblox.com/docs/studio/properties#instance-tags) the module `Signal`.
+
+***
+
+
+
+Each tween will have the following signals:
 
 * [**Updated**](#user-content-fn-1)[^1]
 * [**Started**](#user-content-fn-2)[^2]
@@ -9,7 +38,7 @@ After creating a new tween, you can listen to the following signals:
 
 
 
-Example:
+Example usage:
 
 ```lua
 local tween = Tween(workspace.Part, {Transparency = 1}, {Time = 2})
