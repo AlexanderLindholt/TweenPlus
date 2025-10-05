@@ -12,16 +12,19 @@
      ====           ======    ======      ========================   ====     ======        :::     
      ====            ====      ====       ========================   ====       ====                
 
-v2.11.0
+v2.12.0
 
 An open-source tweening library for Roblox, featuring advanced
 datatypes, customization, interpolation, and optimization.
 
 
-GitHub:
+GitHub (repository):
 https://github.com/AlexanderLindholt/TweenPlus
 
-DevForum:
+GitBook (documentation):
+https://alexxander.gitbook.io/TweenPlus
+
+DevForum (topic):
 https://devforum.roblox.com/t/3599638
 
 

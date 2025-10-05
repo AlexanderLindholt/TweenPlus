@@ -92,7 +92,7 @@ local function cframeLerper(a, b)
 			-- Matrix.
 			1 - 2*(ry*ry + rz*rz), 2*(rx*ry - rw*rz), 2*(rx*rz + rw*ry),
 			2*(rx*ry + rw*rz), 1 - 2*(rx*rx + rz*rz), 2*(ry*rz - rw*rx),
-			2*(rx*rz - rw*ry), 2*(ry*rz + rw*rx), 1 - 2*(rx*rx + ry^2)
+			2*(rx*rz - rw*ry), 2*(ry*rz + rw*rx), 1 - 2*(rx*rx + ry*ry)
 		)
 	end
 end
@@ -166,36 +166,37 @@ local function colorLerper(a, b)
 	return function(alpha)
 		if alpha == 1 then return b end
 		
-		local r, g, b = oklabToRGB(
-			l1 + (l2 - l1)*alpha,
-			a1 + (a2 - a1)*alpha,
-			b1 + (b2 - b1)*alpha
+		return Color3.new(
+			oklabToRGB(
+				l1 + (l2 - l1)*alpha,
+				a1 + (a2 - a1)*alpha,
+				b1 + (b2 - b1)*alpha
+			)
 		)
-		return Color3.new(r, g, b)
 	end
 end
 
-local function findKeypoints(source, targetTime)
+local function findKeypoints(keypoints, targetTime)
+	-- Binary search for a specific time.
 	local low = 1
-	local high = #source
+	local high = #keypoints
 	while low <= high do
-		local mid = (low + high)//2
-		local midTime = source[mid].Time
+		local mid = math.floor((low + high)*0.5)
+		local midTime = keypoints[mid].Time
 		if midTime < targetTime then
 			low = mid + 1
 		elseif midTime > targetTime then
 			high = mid - 1
 		else
+			mid = keypoints[mid]
 			return mid, mid
 		end
 	end
-	return high, low
+	return keypoints[high], keypoints[low]
 end
 local function getNumberKeypoint(sequence, time)
 	local keypoints = sequence.Keypoints
-	local index1, index2 = findKeypoints(keypoints, time)
-	local a = keypoints[index1]
-	local b = keypoints[index2]
+	local a, b = findKeypoints(keypoints, time)
 	
 	local aTime = a.Time
 	
@@ -211,9 +212,7 @@ local function getNumberKeypoint(sequence, time)
 end
 local function getColorKeypoint(sequence, time)
 	local keypoints = sequence.Keypoints
-	local index1, index2 = findKeypoints(keypoints, time)
-	local a = keypoints[index1]
-	local b = keypoints[index2]
+	local a, b = findKeypoints(keypoints, time)
 	
 	local aTime = a.Time
 	
@@ -392,15 +391,18 @@ return {
 		end,
 		
 		NumberSequence = function(a, b)
+			-- Gather unique times.
 			local uniqueTimes = {}
 			for index, keypoint in a.Keypoints do
 				uniqueTimes[index] = keypoint.Time
 			end
-			for _, keypoint in b.Keypoints do
-				table.insert(uniqueTimes, keypoint.Time)
+			local previousAmount = #uniqueTimes
+			for index, keypoint in b.Keypoints do
+				uniqueTimes[index + previousAmount] = keypoint.Time
 			end
 			table.sort(uniqueTimes)
 			
+			-- Create and store lerpers.
 			local valueLerpers = {}
 			local envelopeLerpers = {}
 			for index, time in uniqueTimes do
@@ -410,6 +412,7 @@ return {
 				envelopeLerpers[index] = numberLerper(aEnvelope, bEnvelope)
 			end
 			
+			-- Final interpolator.
 			return function(alpha)
 				if alpha == 1 then return b end
 				
@@ -426,20 +429,24 @@ return {
 		end,
 		
 		ColorSequence = function(a, b)
+			-- Gather unique times.
 			local uniqueTimes = {}
 			for index, keypoint in a.Keypoints do
 				uniqueTimes[index] = keypoint.Time
 			end
+			local previousAmount = #uniqueTimes
 			for index, keypoint in b.Keypoints do
-				table.insert(uniqueTimes, keypoint.Time)
+				uniqueTimes[index + previousAmount] = keypoint.Time
 			end
 			table.sort(uniqueTimes)
 			
+			-- Create and store lerpers.
 			local lerpers = {}
 			for index, time in uniqueTimes do
 				lerpers[index] = colorLerper(getColorKeypoint(a, time), getColorKeypoint(b, time))
 			end
 			
+			-- Final interpolator.
 			return function(alpha)
 				if alpha == 1 then return b end
 				

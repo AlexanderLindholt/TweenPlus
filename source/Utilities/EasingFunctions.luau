@@ -23,7 +23,7 @@ end
 
 -- Quad easing.
 local function inQuad(alpha)
-	return alpha^2
+	return alpha*alpha
 end
 local function outQuad(alpha)
 	return alpha*(2 - alpha)
@@ -31,7 +31,7 @@ end
 local function inOutQuad(alpha)
 	alpha *= 2
 	return if alpha < 1 then
-		0.5*alpha^2
+		0.5*alpha*alpha
 		else
 		1 - 0.5*(2 - alpha)^2
 end
@@ -151,7 +151,7 @@ end
 
 -- Circular easing.
 local function inCircular(alpha)
-	return 1 - math.sqrt(1 - alpha^2)
+	return 1 - math.sqrt(1 - alpha*alpha)
 end
 local function outCircular(alpha)
 	return math.sqrt(1 - (alpha - 1)^2)
@@ -159,7 +159,7 @@ end
 local function inOutCircular(alpha)
 	alpha *= 2
 	return if alpha < 1 then
-		0.5*(1 - math.sqrt(1 - alpha^2))
+		0.5*(1 - math.sqrt(1 - alpha*alpha))
 		else
 		0.5*(math.sqrt(1 - (alpha - 2)^2) + 1)
 end
@@ -207,19 +207,19 @@ end
 
 -- Back easing.
 local function inBack(alpha)
-	return alpha^2*((backS + 1)*alpha - backS)
+	return alpha*alpha*((backS + 1)*alpha - backS)
 end
 local function outBack(alpha)
 	local a = alpha - 1
-	return a^2*((backS + 1)*a + backS) + 1
+	return a*a*((backS + 1)*a + backS) + 1
 end
 local function inOutBack(alpha)
 	alpha *= 2
 	if alpha < 1 then
-		return 0.5*alpha^2*((backInOutS + 1)*alpha - backInOutS)
+		return 0.5*alpha*alpha*((backInOutS + 1)*alpha - backInOutS)
 	else
 		alpha -= 2
-		return 0.5*(alpha^2*((backInOutS + 1)*alpha + backInOutS) + 2)
+		return 0.5*(alpha*alpha*((backInOutS + 1)*alpha + backInOutS) + 2)
 	end
 end
 local function outInBack(alpha)
@@ -232,7 +232,7 @@ end
 -- Bounce easing.
 local function outBounce(alpha)
 	return if alpha < 1/2.75 then
-		7.5625*alpha^2
+		7.5625*alpha*alpha
 		elseif alpha < 2/2.75 then
 		7.5625*(alpha - 1.5/2.75)^2 + 0.75
 		elseif alpha < 2.5/2.75 then

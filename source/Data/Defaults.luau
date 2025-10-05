@@ -3,7 +3,10 @@
 -- Services.
 local CollectionService = game:GetService("CollectionService")
 
--- Initialize defaults table with default defaults.
+-- Attempt to find the plugin object.
+local plugin = script:FindFirstAncestorOfClass("Plugin")
+
+-- Default defaults.
 local defaults = {
 	Time = 1,
 	
@@ -17,32 +20,38 @@ local defaults = {
 }
 
 -- Merge user defaults.
-local userDefaults = CollectionService:GetTagged("TweenDefaults")[1]
-if userDefaults then
-	userDefaults = require(userDefaults)
-	if type(userDefaults) == "table" then
-		local options = {
-			Time = true,
-			
-			EasingDirection = true,
-			
-			DelayTime = true,
-			Reverses = true,
-			RepeatCount = true,
-			
-			FPS = true
-		}
-		for key in userDefaults do
-			if options[key] then defaults[key] = userDefaults[key] end
+local userDefaults
+if plugin then
+	for _, instance in plugin:GetDescendants() do
+		if instance:HasTag("TextDefaults") then
+			userDefaults = require(instance)
+			break
 		end
+	end
+else
+	userDefaults = CollectionService:GetTagged("TextDefaults")[1]
+	if userDefaults then userDefaults = require(userDefaults) end
+end
+if userDefaults and type(userDefaults) == "table" then
+	local optionsList = {
+		Time = true,
+		
+		EasingDirection = true,
+		
+		DelayTime = true,
+		Reverses = true,
+		RepeatCount = true,
+		
+		FPS = true
+	}
+	for key in userDefaults do
+		if optionsList[key] then defaults[key] = userDefaults[key] end
 	end
 end
 
--- Remove falses.
+-- Remove false booleans.
 for key, value in defaults do
-	if value == false then
-		defaults[key] = nil
-	end
+	if value == false then defaults[key] = nil end
 end
 
 -- Remove DelayTime if 0.
