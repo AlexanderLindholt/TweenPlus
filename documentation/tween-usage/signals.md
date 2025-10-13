@@ -49,7 +49,7 @@ end)
 tween:Start()
 ```
 
-[^1]: Fires every iteration of playback; every time the instance's values are updated.
+[^1]: Fires every iteration of playback; every time the instance’s values are updated.
 
 [^2]: Fires when the playback is started or resumed.
 

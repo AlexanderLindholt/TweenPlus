@@ -17,7 +17,7 @@ layout:
 
 # States
 
-The following are properties representing the tween's state:
+The following are properties representing the tween’s state:
 
 * **Playing**: boolean
 * **Repetitions**: number
@@ -41,7 +41,7 @@ tween:Start()
 task.wait(5)
 if shared.MyTween.Playing then
 	print("Tween is still playing, wow!")
-	-- Let's print some information about the progress!
+	-- Let’s print some information about the progress!
 	print("Tween is going "..(if shared.MyTween.Reverses then " in reverse" else "forward").."!")
 	print("Tween has done "..shared.MyTween.Repetitions.." repetitions!")
 	print("Tween is exactly "..shared.MyTween.Alpha*100.."% done with the current repetition.") -- Alpha is in the range 0-1, so we multiply by 100 to get the percentage.

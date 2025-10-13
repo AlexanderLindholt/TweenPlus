@@ -5,7 +5,7 @@ coverY: 0
 
 # Welcome
 
-Get ready to experience tweening in Roblox like it should've been.
+Get ready to experience tweening in Roblox like it should’ve been.
 
 With all the features of TweenService,\
 and many new and amazing features:
@@ -26,4 +26,4 @@ and many new and amazing features:
 
 
 
-**Ready to learn all about it? Let's go!**
+**Ready to learn all about it? Let’s go!**

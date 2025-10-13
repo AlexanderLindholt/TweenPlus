@@ -46,4 +46,4 @@ tween:Start() -- Resume after a 1 second pause.
 
 [^3]: Stops playback of the tween, and resets to starting values.
 
-[^4]: Makes the tween unusable, and ensures it's stopped.
+[^4]: Makes the tween unusable, and ensures it’s stopped.

@@ -38,5 +38,5 @@ Here are the currently supported hidden properties:
 * [Pivot](https://create.roblox.com/docs/reference/engine/classes/PVInstance#summary-methods)
 * [Scale](https://create.roblox.com/docs/reference/engine/classes/Model#Scale)
 
-As far as I'm aware, there are no other hidden properties.\
+As far as I’m aware, there are no other hidden properties.\
 Make sure to let me know if I missed any!

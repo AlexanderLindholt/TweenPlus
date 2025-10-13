@@ -17,7 +17,7 @@ layout:
 
 # Introduction
 
-When you require the module, it'll return a function, which you can use to create tweens:
+When you require the module, it’ll return a function, which you can use to create tweens:
 
 ```lua
 local Tween = require(script.TweenPlus)
@@ -36,7 +36,7 @@ local tween = Tween(
 	{
 		Position = Vector3.new(0, 10, 0),
 		Color = Color3.fromRGB(255, 255, 0)
-		-- And as many more as you'd like.
+		-- And as many more as you’d like.
 	}
 )
 ```
@@ -44,5 +44,5 @@ local tween = Tween(
 
 
 {% hint style="warning" %}
-In game context, make sure to require the APIMap module on the server, otherwise Tween+ won't function.
+In game context, make sure to require the APIMap module on the server, otherwise Tween+ won’t function.
 {% endhint %}

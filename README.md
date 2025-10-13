@@ -12,7 +12,7 @@ datatypes, customization, interpolation, and optimization.
 <br>
 
 # 🌟 More capabilities!
-Experience animation in Roblox like it should've been.<br>
+Experience animation in Roblox like it should’ve been.<br>
 <br>
 
 With all the features of TweenService,<br>

@@ -18,7 +18,7 @@ layout:
 
 # Supported datatypes
 
-P**roperty/attribute types:**
+**Property/attribute types:**
 
 * boolean
 * number

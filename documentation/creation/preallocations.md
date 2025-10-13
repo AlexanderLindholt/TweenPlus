@@ -19,7 +19,7 @@ layout:
 
 One of the countless optimizations Tween+ does is pre-allocating tween slots.
 
-Here's all you need to know:
+Here’s all you need to know:
 
 ```diff
 + The more pre-allocations, the more tweens you can have with quicker start/stop.
@@ -31,4 +31,4 @@ The memory consumption can be calculated like this:
 Bytes  =  PreallocationAmount * 8
 ```
 
-You can customize the preallocation amount via the `TweenPreallocations` attribute on the main module. It's obviously recommended to leave it at what you believe to be the maximum amount of tweens you're going to be using at once.
+You can customize the preallocation amount via the `TweenPreallocations` attribute on the main module. It’s obviously recommended to leave it at what you believe to be the maximum amount of tweens you’re going to be using at once.
