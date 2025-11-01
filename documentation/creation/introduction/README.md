@@ -30,18 +30,15 @@ local tween = Tween(
 
 You simply input all the values you would like to tween:
 
-```lua
-local tween = Tween(
+<pre class="language-lua"><code class="lang-lua">local tween = Tween(
 	workspace.Part,
 	{
-		Position = Vector3.new(0, 10, 0),
-		Color = Color3.fromRGB(255, 255, 0)
-		-- And as many more as you’d like.
-	}
+<strong>		Position = Vector3.new(0, 10, 0),
+</strong><strong>		Color = Color3.fromRGB(255, 255, 0)
+</strong><strong>		-- And as many more as you’d like.
+</strong>	}
 )
-```
-
-
+</code></pre>
 
 {% hint style="warning" %}
 In game context, make sure to require the APIMap module on the server, otherwise Tween+ won’t function.

@@ -23,10 +23,8 @@ Most of the following defaults can be overwritten by [custom defaults](custom-de
 {% endhint %}
 
 {% hint style="warning" %}
-Defaults marked with _<mark style="color:$warning;">**colored bold italic**</mark>_ can’t be overwritten by custom defaults.
+Default values marked with _**bold italic**_ can’t be overwritten by custom defaults.
 {% endhint %}
-
-
 
 * **Time:** number\
   &#xNAN;_&#x44;efault:_ `1`\
@@ -47,7 +45,6 @@ Defaults marked with _<mark style="color:$warning;">**colored bold italic**</mar
   &#xNAN;_&#x44;efault:_ `nil`\
   ​
 * **Update:** "PreSimulation" | "PostSimulation"\
-  &#xNAN;_&#x44;efault:_ `PreSimulation`\
-
+  &#xNAN;_&#x44;efault:_ `PreSimulation`
 * **Replicate:** boolean\
-  &#xNAN;_&#x44;efault: <mark style="color:$warning;">**`true`**</mark>_
+  &#xNAN;_&#x44;efault: **`true`**_

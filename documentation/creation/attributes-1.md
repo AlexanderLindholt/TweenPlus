@@ -22,16 +22,13 @@ They work the same as usual properties in Tween+.
 
 Example usage of hidden properties:
 
-```lua
-local tween = Tween(
+<pre class="language-lua"><code class="lang-lua">local tween = Tween(
 	workspace.Model,
 	{
-		Pivot = workspace.Model:GetPivot().CFrame -- The hidden 'Pivot' property. Read/write with `:GetPivot()` and `:PivotTo()`.
-	}
+<strong>		Pivot = workspace.Model:GetPivot().CFrame -- The hidden 'Pivot' property. Read/write with `:GetPivot()` and `:PivotTo()`.
+</strong>	}
 )
-```
-
-
+</code></pre>
 
 Here are the currently supported hidden properties:
 
