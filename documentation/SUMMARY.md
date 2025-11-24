@@ -1,7 +1,6 @@
 # Table of contents
 
-* [Welcome](README.md)
-* [Installation](installation.md)
+* [Installation](README.md)
 
 ## Creation
 
@@ -16,7 +15,7 @@
   * [Custom defaults](creation/customization/custom-defaults.md)
 * [Preallocations](creation/preallocations.md)
 
-## Tween  usage
+## Tween usage
 
 * [Playback and control](tween-usage/playback-and-control.md)
 * [States](tween-usage/states.md)
