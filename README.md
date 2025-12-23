@@ -12,12 +12,12 @@ datatypes, customization, interpolation, and optimization.
 <br>
 
 # 🌟 More capabilities!
-Experience animation in Roblox like it should’ve been.<br>
+Experience animation in Roblox like never before.<br>
 <br>
 
 With all the features of TweenService,<br>
 and many new and amazing features:
-- Advanced networking for efficient server tweening.
+- Advanced networking for efficient global tweening.
 - [Attributes](https://create.roblox.com/docs/scripting/attributes) support.
 - Support for advanced data types:
   - Sequences.
