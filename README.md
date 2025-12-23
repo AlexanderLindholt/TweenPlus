@@ -5,7 +5,7 @@
 An open-source tweening library for Roblox, featuring advanced<br>
 datatypes, customization, interpolation, and optimization.
 
-[<img src="https://raw.githubusercontent.com/AlexanderLindholt/LinkButtons/refs/heads/main/Static/Module.png"></img>](https://create.roblox.com/store/asset/100081703118723) ​ [<img src="https://raw.githubusercontent.com/AlexanderLindholt/LinkButtons/refs/heads/main/Static/Devforum.png"></img>](https://devforum.roblox.com/t/3599638)
+[<img src="https://raw.githubusercontent.com/AlexanderLindholt/LinkButtons/refs/heads/main/Module.png"></img>](https://create.roblox.com/store/asset/100081703118723) ​ [<img src="https://raw.githubusercontent.com/AlexanderLindholt/LinkButtons/refs/heads/main/DevForum.png"></img>](https://devforum.roblox.com/t/3599638) ​ [<img src="https://raw.githubusercontent.com/AlexanderLindholt/LinkButtons/refs/heads/main/GitBook.png"></img>](https://alexxander.gitbook.io/tweenplus)
 </div>
 <br>
 ​<br>
