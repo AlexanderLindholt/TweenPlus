@@ -40,6 +40,4 @@ and many new and amazing features:
 ​<br>
 <br>
 
-
-## Check out the [guides and documentation](https://alexxander.gitbook.io/tweenplus) to learn all about it!
-<br>
+# Check out showcases and more information [here](https://devforum.roblox.com/t/3599638)!
