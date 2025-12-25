@@ -65,6 +65,7 @@ local function cframeLerper(a, b)
 	
 	-- Interpolation function.
 	return function(alpha)
+		if alpha == 0 then return a end
 		if alpha == 1 then return b end
 		
 		-- Quaternion lerp.
@@ -164,6 +165,7 @@ local function colorLerper(a, b)
 	local l1, a1, b1 = rgbToOklab(a.R, a.G, a.B)
 	local l2, a2, b2 = rgbToOklab(b.R, b.G, b.B)
 	return function(alpha)
+		if alpha == 0 then return a end
 		if alpha == 1 then return b end
 		
 		return Color3.new(
@@ -352,6 +354,7 @@ return {
 			local suffix = if suffixLength > 0 then a:sub(-suffixLength) else ""
 			
 			return function(alpha)
+				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
 				local aVisible = math.floor(#aMiddle*(1 - alpha) + 0.5)
@@ -414,6 +417,7 @@ return {
 			
 			-- Final interpolator.
 			return function(alpha)
+				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
 				local keypoints = {}
@@ -448,6 +452,7 @@ return {
 			
 			-- Final interpolator.
 			return function(alpha)
+				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
 				local keypoints = {}

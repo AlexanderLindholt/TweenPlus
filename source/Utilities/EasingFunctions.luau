@@ -1,6 +1,9 @@
 --!optimize 2
 --!native
 
+-- Services.
+local CollectionService = game:GetService("CollectionService")
+
 -- Elastic constants.
 local elasticInP = 0.3
 local elasticInA = 1.0
@@ -44,7 +47,7 @@ end
 
 -- Cubic easing.
 local function inCubic(alpha)
-	return alpha^3
+	return alpha*alpha*alpha
 end
 local function outCubic(alpha)
 	return 1 + (alpha - 1)^3
@@ -52,7 +55,7 @@ end
 local function inOutCubic(alpha)
 	alpha *= 2
 	return if alpha < 1 then
-		0.5*alpha^3
+		0.5*alpha*alpha*alpha
 		else
 		0.5*((alpha - 2)^3 + 2)
 end
@@ -65,7 +68,7 @@ end
 
 -- Quart easing.
 local function inQuart(alpha)
-	return alpha^4
+	return alpha*alpha*alpha*alpha
 end
 local function outQuart(alpha)
 	return 1 - (alpha - 1)^4
@@ -73,7 +76,7 @@ end
 local function inOutQuart(alpha)
 	alpha *= 2
 	return if alpha < 1 then
-		0.5*alpha^4
+		0.5*alpha*alpha*alpha*alpha
 		else
 		-0.5*((alpha - 2)^4 - 2)
 end
@@ -86,7 +89,7 @@ end
 
 -- Quint easing.
 local function inQuint(alpha)
-	return alpha^5
+	return alpha*alpha*alpha*alpha*alpha
 end
 local function outQuint(alpha)
 	return 1 + (alpha - 1)^5
@@ -94,7 +97,7 @@ end
 local function inOutQuint(alpha)
 	alpha *= 2
 	return if alpha < 1 then
-		0.5*alpha^5
+		0.5*alpha*alpha*alpha*alpha*alpha
 		else
 		0.5*((alpha - 2)^5 + 2)
 end
@@ -124,10 +127,7 @@ end
 
 -- Exponential easing.
 local function inExponential(alpha)
-	return if alpha == 0 then
-		0
-		else
-		2^(10*(alpha - 1))
+	return 2^(10*(alpha - 1))
 end
 local function outExponential(alpha)
 	return if alpha == 1 then
@@ -256,8 +256,8 @@ local function outInBounce(alpha)
 		0.5*inBounce(2*alpha - 1) + 0.5
 end
 
--- Map and return easing functions.
-return {
+-- Map built-in functions.
+local easingFunctions = {
 	Linear = linear,
 	Quad = {
 		In = inQuad,
@@ -320,3 +320,40 @@ return {
 		OutIn = outInBounce,
 	}
 }
+
+-- Handle user functions.
+local userFunctions = CollectionService:GetTagged("EasingFunctions")[1]
+if userFunctions then
+	userFunctions = require(userFunctions)
+	
+	local directions = {
+		In = true,
+		Out = true,
+		InOut = true,
+		OutIn = true
+	}
+	
+	for key, value in userFunctions do
+		if type(key) ~= "string" then warn("Invalid easing function name:", key) continue end
+		if easingFunctions[key] then warn("Easing function name '"..key.."' already used.") continue end
+		
+		local valueType = type(value)
+		if valueType ~= "function" and valueType ~= "table" then warn("Missing function for '"..key.."' easing definition.") continue end
+		
+		if valueType == "table" then
+			local missing
+			for _, direction in directions do
+				if type(value[direction]) ~= "function" then
+					missing = true
+					warn("Missing "..direction.." direction function for '"..key.."' easing.")
+				end
+			end
+			if missing then continue end
+		end
+		
+		easingFunctions[key] = value
+	end
+end
+
+-- Return all functions.
+return easingFunctions

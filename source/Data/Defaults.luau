@@ -10,39 +10,45 @@ local plugin = script:FindFirstAncestorOfClass("Plugin")
 local defaults = {
 	Time = 1,
 	
+	EasingStyle = "Linear",
 	EasingDirection = "In",
 	
 	DelayTime = 0,
 	Reverses = false,
 	RepeatCount = 0,
 	
-	FPS = nil
+	FPS = nil,
+	
+	Replicate = false
 }
 
 -- Merge user defaults.
 local userDefaults
 if plugin then
 	for _, instance in plugin:GetDescendants() do
-		if instance:HasTag("TextDefaults") then
+		if instance:HasTag("TweenDefaults") then
 			userDefaults = require(instance)
 			break
 		end
 	end
 else
-	userDefaults = CollectionService:GetTagged("TextDefaults")[1]
+	userDefaults = CollectionService:GetTagged("TweenDefaults")[1]
 	if userDefaults then userDefaults = require(userDefaults) end
 end
 if userDefaults and type(userDefaults) == "table" then
 	local optionsList = {
 		Time = true,
 		
+		EasingStyle = true,
 		EasingDirection = true,
 		
 		DelayTime = true,
 		Reverses = true,
 		RepeatCount = true,
 		
-		FPS = true
+		FPS = true,
+		
+		Replicate = true
 	}
 	for key in userDefaults do
 		if optionsList[key] then defaults[key] = userDefaults[key] end

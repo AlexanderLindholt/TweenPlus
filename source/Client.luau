@@ -8,27 +8,14 @@ local RunService = game:GetService("RunService")
 -- Attempt to find the plugin object.
 local plugin = script:FindFirstAncestorOfClass("Plugin")
 
--- Network packets and API map.
-local packets, apiMap
-if plugin then
-	for _, instance in plugin:GetDescendants() do
-		if instance:HasTag("APIMap") then
-			apiMap = require(instance)
-			break
-		end
-	end
-	if not apiMap then error("Could not find APIMap module.") end
-else -- Game context.
+-- Network packets.
+local packets
+if not plugin then -- Game context.
 	packets = CollectionService:GetTagged("Packets")[1]
-	if not packets then error("Could not find packets module.") end
-	packets = require(packets)
-	
-	apiMap = CollectionService:GetTagged("APIMap")[1]
-	if not apiMap then error("Could not find APIMap module") end
-	apiMap = require(apiMap)
+	if packets then packets = require(packets) end
 end
 
--- Signal library.
+-- Signal library.                                                                                                                                                                                                                                                                                                                                                                                          
 local Signal
 if plugin then
 	for _, instance in plugin:GetDescendants() do
@@ -38,7 +25,7 @@ if plugin then
 			break
 		end
 	end
-else
+else -- Game context.
 	Signal = CollectionService:GetTagged("Signal")[1]
 	if Signal then
 		Signal = require(Signal)
@@ -189,27 +176,24 @@ do
 			if phaseCompleted then
 				if tween.Reverse then
 					alpha = 0
-					for _, reset in tween.ResetFunctions do reset() end -- Reset is equivelant to updating to alpha 0, but faster due to lack of interpolation.
+					for _, update in tween.UpdateFunctions do update(0) end
 				else
 					alpha = 1
 					for _, update in tween.UpdateFunctions do update(1) end
 				end
 			else
-				if tween.Reverse then alpha = 1 - alpha end -- Reverse alpha to match, if going in reverse.
+				if tween.Reverse then alpha = 1 - alpha end -- Reverse alpha to match if going in reverse.
 				
 				local easedAlpha = tween.Ease(alpha)
 				for _, update in tween.UpdateFunctions do update(easedAlpha) end
 			end
 			
-			-- Save alpha and fire update signal.
+			-- Save alpha.
+			tween.Alpha = alpha
+			
+			-- Fire update signal.
 			local updateSignal = tween.Updated
-			if updateSignal then
-				-- Rest assured it's a local tween because it has signals.
-				tween.Alpha = alpha
-				updateSignal:Fire()
-			else
-				tween.Alpha = alpha
-			end
+			if updateSignal then updateSignal:Fire() end
 			
 			-- Phase completion stuff.
 			if phaseCompleted then
@@ -288,7 +272,7 @@ Tween.Reset = function(tween: InternalTween)
 	tween.StartTime = 0
 	tween.Repetitions = 0
 	tween.Reverse = nil
-	for _, reset in tween.ResetFunctions do reset() end
+	for _, update in tween.UpdateFunctions do update(0) end
 	return tween
 end
 Tween.Destroy = destroy
@@ -302,11 +286,11 @@ if packets then
 		"ResetTween",
 		"DestroyTween"
 	}
-	local tweenPackets = {}
+	local tweenPackets = 0
 	for _, name in requiredPackets do
-		if packets[name] then table.insert(tweenPackets, name) end
+		if packets[name] then tweenPackets += 1 end
 	end
-	if #tweenPackets == #requiredPackets then
+	if tweenPackets == #requiredPackets then
 		requiredPackets, tweenPackets = nil -- Erase unnecessary data.
 		
 		local globalTweens = table.create(256) -- Preallocate the maximum amount of global tweens.
@@ -335,14 +319,19 @@ if packets then
 		end
 		
 		packets.CreateTween.OnClientEvent:Connect(function(identifier, instance, values, options)
-			-- Argument errors.
+			-- Argument validation.
 			if not instance then error("Could not find instance on client.") end
 			
 			-- Handle values.
-			local updateFunctions, resetFunctions = createUpdateFunctions(apiMap, instance, values)
+			local updateFunctions = createUpdateFunctions(instance, values)
+			
+			-- Handle options.
+			local easingFunction = easingFunctions[options[2] or defaults.EasingStyle]
+			if type(easingFunction) == "table" then
+				easingFunction = easingFunction[options[3] or defaults.EasingDirection]
+			end
 			
 			-- Create tween.
-			local easingStyle = options[2]
 			local tween = {
 				-- Identifier.
 				Identifier = identifier,
@@ -353,14 +342,10 @@ if packets then
 				
 				-- Value functions.
 				UpdateFunctions = updateFunctions,
-				ResetFunctions = resetFunctions,
 				
 				-- Options.
 				InverseTweenTime = options[1] or defaults.InverseTime,
-				Ease = if easingStyle then
-					if easingStyle == "Linear" then easingFunctions.Linear else easingFunctions[easingStyle][options[3]]
-				else
-					easingFunctions.Linear,
+				Ease = easingFunction,
 				DelayTime = options[4] or defaults.DelayTime,
 				Reverses = options[5] or defaults.Reverses,
 				RepeatCount = options[6] or defaults.RepeatCount,
@@ -383,7 +368,7 @@ if packets then
 			end)
 		end)
 		
-		packets.StartTween.OnClientEvent:Connect(function(identifier, runTime, repetitions)
+		packets.StartTween.OnClientEvent:Connect(function(identifier, fireTime, runTime, repetitions)
 			local tween = globalTweens[identifier]
 			if not tween then return end
 			
@@ -395,7 +380,7 @@ if packets then
 			end
 			if tween.StopTime then
 				if runTime then
-					tween.StartTime = getTime() - runTime
+					tween.StartTime = getTime() - runTime - (workspace:GetServerTimeNow() - fireTime)
 					start(tween, true)
 				else
 					start(tween)
@@ -413,7 +398,7 @@ if packets then
 			if not tween then return end
 			
 			if tween.Playing then stop(tween) end
-			for _, reset in tween.ResetFunctions do reset() end
+			for _, update in tween.UpdateFunctions do update(0) end
 		end)
 		packets.DestroyTween.OnClientEvent:Connect(function(identifier)
 			local tween = globalTweens[identifier]
@@ -426,13 +411,12 @@ end
 
 -- Local tween creation.
 return function(instance, values, options)
-	-- Argument errors.
+	-- Argument validation.
 	if typeof(instance) ~= "Instance" then error("Invalid instance.", 2) end
 	if type(values) ~= "table" then error("Invalid values.", 2) end
-	if type(options) ~= "table" then error("Invalid options.", 2) end
 	
 	-- Handle values.
-	local updateFunctions, resetFunctions = createUpdateFunctions(apiMap, instance, values)
+	local updateFunctions = createUpdateFunctions(instance, values)
 	
 	-- Handle options.
 	local tweenTime = options.Time
@@ -444,26 +428,10 @@ return function(instance, values, options)
 		tweenTime = 1/tweenTime
 	end
 	
-	local ease
-	do
-		local easingStyle = options.EasingStyle
-		local easing = easingFunctions[easingStyle]
-		if not easing then
-			easingStyle = "Linear"
-			easing = easingFunctions.Linear
-		end
-		if easingStyle == "Linear" then
-			ease = easing
-		else
-			local easingDirection = options.EasingDirection
-			ease = easing[easingDirection]
-			if not ease then
-				easingDirection = defaults.EasingDirection
-				ease = easing[easingDirection]
-			end
-		end
+	local easingFunction = easingFunctions[options.EasingStyle] or easingFunctions[defaults.EasingStyle]
+	if type(easingFunction) == "table" then
+		easingFunction = easingFunction[options.EasingDirection] or easingFunction[defaults.EasingDirection]
 	end
-	
 	
 	local delayTime = options.DelayTime
 	if type(delayTime) ~= "number" or delayTime <= 0 then
@@ -484,7 +452,6 @@ return function(instance, values, options)
 		repeatCount = -1
 	end
 	
-	
 	local interval = options.FPS
 	if type(interval) == "number" then
 		interval = 1/interval
@@ -498,11 +465,10 @@ return function(instance, values, options)
 		
 		-- Value functions.
 		UpdateFunctions = updateFunctions,
-		ResetFunctions = resetFunctions,
 		
 		-- Options.
 		InverseTweenTime = tweenTime,
-		Ease = ease,
+		Ease = easingFunction,
 		DelayTime = delayTime,
 		Reverses = reverses,
 		RepeatCount = repeatCount,

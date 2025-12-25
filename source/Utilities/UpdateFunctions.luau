@@ -1,5 +1,7 @@
 --!optimize 2
---!native
+
+-- Services.
+local ReflectionService = game:GetService("ReflectionService")
 
 -- Value functions.
 local valueFunctions = require(script.Parent.ValueFunctions)
@@ -8,18 +10,13 @@ local normalValueFunctions = valueFunctions.Normal
 local advancedValueFunctions = valueFunctions.Advanced
 
 -- Update functions function.
-return function(apiMap, instance, values)
+return function(instance, values)
 	-- Get properties and verify class.
-	local classProperties = apiMap[instance.ClassName] :: {
-		[string]: {
-			Type: string,
-			Locked: boolean
-		}
-	}
+	local classProperties = ReflectionService:GetPropertiesOfClass(instance.ClassName)
 	if not classProperties then error("Could not identify the class of instance '"..instance:GetFullName().."'.", 3) end
-
+	
 	-- Verify values and add update functions for each.
-	local updateFunctions, resetFunctions = table.create(#values), table.create(#values)
+	local updateFunctions = table.create(#values)
 	
 	local index = 1
 	for name, destination in values do
@@ -39,14 +36,33 @@ return function(apiMap, instance, values)
 			updateFunctions[index] = function(alpha)
 				instance:SetAttribute(attributeName, value(alpha))
 			end
-			resetFunctions[index] = function()
-				instance:SetAttribute(attributeName, original)
-			end
 		else
 			-- Not attribute.
-			local property = classProperties[name]
-			if not property then
-				local value = advancedValueFunctions[name]
+			local value
+			for _, data in classProperties do
+				if data.Name == name then
+					local permits = data.Permits
+					if not permits.Read then continue end -- Skip non-readable properties, as they are not relevant.
+					
+					-- Property.
+					if not permits.Write then error("'"..name.."' is not a writable property.", 3) end
+					
+					value = normalValueFunctions[typeof(destination)]
+					if not value then error("'"..typeof(destination).."' data type is not supported.", 3) end
+					
+					local original = instance[name]
+					value = value(original, destination)
+					
+					updateFunctions[index] = function(alpha)
+						instance[name] = value(alpha)
+					end
+					
+					break
+				end
+			end
+			
+			if not value then
+				value = advancedValueFunctions[name]
 				if value then
 					-- Hidden property.
 					if not instance:IsA(value.Target) then error("'"..instance:GetFullName().."' doesn't support "..name..".", 3) end
@@ -56,30 +72,9 @@ return function(apiMap, instance, values)
 					updateFunctions[index] = function(alpha)
 						setValue(alpha)
 					end
-					resetFunctions[index] = function()
-						setValue(0)
-					end
-					
-					continue
 				else
 					error("'"..name.."' is not a valid property of '"..instance:GetFullName().."'.", 3)
 				end
-			end
-			
-			-- Property.
-			if property.Locked then error("'"..name.."' is a locked property.", 3) end
-			
-			local value = normalValueFunctions[typeof(destination)]
-			if not value then error("'"..typeof(destination).."' data type is not supported.", 3) end
-			
-			local original = instance[name]
-			value = value(original, destination)
-			
-			updateFunctions[index] = function(alpha)
-				instance[name] = value(alpha)
-			end
-			resetFunctions[index] = function()
-				instance[name] = original
 			end
 		end
 		
@@ -87,5 +82,5 @@ return function(apiMap, instance, values)
 	end
 	
 	-- Return update functions.
-	return updateFunctions, resetFunctions
+	return updateFunctions
 end
