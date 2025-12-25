@@ -17,7 +17,7 @@ layout:
 
 # Attributes
 
-_If you aren’t already familiar with attributes, please check out_ [_Roblox’s explanation_](https://create.roblox.com/docs/scripting/attributes)_._
+_If you aren’t already familiar with attributes, please check out the_ [_official explanation_](https://create.roblox.com/docs/scripting/attributes)_._
 
 Starting a value name off with `@` will let Tween+ know that it’s an attribute.\
 Other than that they work the same as usual properties.

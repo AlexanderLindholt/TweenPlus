@@ -17,6 +17,6 @@ layout:
 
 # Introduction
 
-Tween+ offers highly optimized networking for incredibly efficient global tweening in games.
+Tween+ offers highly optimized networking for efficient global tweening in games.
 
-Check out the comparison to TweenService in the main DevForum post — you’ll likely be surprised by how much better Tween+ performs.
+See the main [DevForum](https://devforum.roblox.com/t/v2-tween-advanced-performant-tweening/3599638/163) post for a comparison to TweenService—the performance gap might surprise you.

@@ -24,12 +24,10 @@ The following are properties representing the tween’s state:
 * **Reverse**: boolean
 * [**Alpha**](#user-content-fn-1)[^1]: number
 
-
-
 Example:
 
 {% code title="Script1" %}
-```lua
+```luau
 local tween = Tween(workspace.Part, {Transparency = 1}, {Time = 2, Repetitions = 5, Reverses = true})
 shared.MyTween = tween -- Share the tween with other scripts.
 tween:Start()
@@ -37,7 +35,7 @@ tween:Start()
 {% endcode %}
 
 {% code title="Script2" %}
-```lua
+```luau
 task.wait(5)
 if shared.MyTween.Playing then
 	print("Tween is still playing, wow!")

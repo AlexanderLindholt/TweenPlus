@@ -20,10 +20,12 @@ layout:
 You can enable signals by installing a signal library.
 
 {% hint style="info" %}
-[Signal+](https://devforum.roblox.com/t/3552231) is highly recommended for performance.
+[Signal+](https://devforum.roblox.com/t/3552231) is highly recommended because it’s the best.
 {% endhint %}
 
-Makes sure to [tag](https://create.roblox.com/docs/studio/properties#instance-tags) the module `Signal`.
+Make sure to [tag](https://create.roblox.com/docs/studio/properties#instance-tags) the module `Signal`.
+
+
 
 ***
 
@@ -40,7 +42,7 @@ Each tween will have the following signals:
 
 Example usage:
 
-```lua
+```luau
 local tween = Tween(workspace.Part, {Transparency = 1}, {Time = 2})
 tween.Updated:Connect(function()
 	-- Alpha is in the range 0-1, so we multiply by 100 to get the percentage.

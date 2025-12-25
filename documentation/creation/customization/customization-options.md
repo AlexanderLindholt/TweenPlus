@@ -19,11 +19,7 @@ layout:
 # Options list
 
 {% hint style="success" %}
-Most of the following defaults can be overwritten by [custom defaults](custom-defaults.md).
-{% endhint %}
-
-{% hint style="warning" %}
-Default values marked with _**bold italic**_ can’t be overwritten by custom defaults.
+The following defaults can be overwritten by [custom defaults](custom-defaults.md).
 {% endhint %}
 
 * **Time:** number\
@@ -44,7 +40,5 @@ Default values marked with _**bold italic**_ can’t be overwritten by custom de
 * **FPS:** number\
   &#xNAN;_&#x44;efault:_ `nil`\
   ​
-* **Update:** "PreSimulation" | "PostSimulation"\
-  &#xNAN;_&#x44;efault:_ `PreSimulation`
 * **Replicate:** boolean\
-  &#xNAN;_&#x44;efault: **`true`**_
+  &#xNAN;_&#x44;efault:_ `false`

@@ -17,7 +17,7 @@ layout:
 
 # Hidden properties
 
-In Tween+ you can tween method-based properties, which are not direct properties of the instance.\
+In Tween+, you can tween method-based properties, which are not direct properties of the instance.\
 They work the same as usual properties in Tween+.
 
 Example usage of hidden properties:
@@ -30,10 +30,12 @@ Example usage of hidden properties:
 )
 </code></pre>
 
+
+
 Here are the currently supported hidden properties:
 
 * [Pivot](https://create.roblox.com/docs/reference/engine/classes/PVInstance#summary-methods)
 * [Scale](https://create.roblox.com/docs/reference/engine/classes/Model#Scale)
 
-As far as I’m aware, there are no other hidden properties.\
-Make sure to let me know if I missed any!
+I believe there are none I missed.\
+If I did miss some, please let me know!

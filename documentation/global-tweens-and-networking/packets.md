@@ -17,17 +17,20 @@ layout:
 
 # Packets
 
-Create a new ModuleScript and name it `Packets`.
+Create a new ModuleScript and name it `Packets`.\
+Make sure to [tag](https://create.roblox.com/docs/studio/properties#instance-tags) it `Packets` as well.
 
-Then drag the `Packet` module (the network library) inside of this new module.
+Then drag the `Packet` module (the networking library) inside of this new module.
 
 The `Packets` module shall contain all of the packet definitions.\
-It’s crucial that you include these exact packets in the module for the Tween+ networking to work:
+It’s crucial that you include these exact packets in the module for Tween+ networking to function:
 
-```lua
+```luau
 local Packet = require(script.Packet)
 
 return {
+	Loaded = Packet(),
+	
 	CreateTween = Packet(Packet.NumberU8, Packet.Instance, Packet.Any, Packet.Any),
 	StartTween = Packet(Packet.NumberU8, Packet.Any, Packet.Any),
 	StopTween = Packet(Packet.NumberU8),
@@ -37,5 +40,5 @@ return {
 ```
 
 {% hint style="success" %}
-You can of course add any additional packets at any time for your own use in your game.
+You can of course add any additional packets at any time for your own use in your game!
 {% endhint %}

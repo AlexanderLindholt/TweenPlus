@@ -13,6 +13,7 @@
   * [FPS](creation/customization/fps.md)
   * [Replicate](creation/customization/replicate.md)
   * [Custom defaults](creation/customization/custom-defaults.md)
+* [Custom easing functions](creation/custom-easing-functions.md)
 * [Preallocations](creation/preallocations.md)
 
 ## Tween usage
@@ -24,8 +25,9 @@
 ## Global tweens & networking
 
 * [Introduction](global-tweens-and-networking/introduction.md)
-* [Network library](global-tweens-and-networking/network-library.md)
+* [Networking library](global-tweens-and-networking/network-library.md)
 * [Packets](global-tweens-and-networking/packets.md)
+* [Player-list library](global-tweens-and-networking/player-list-library.md)
 * [Global tweening](global-tweens-and-networking/server-tweening.md)
 * [How it works](global-tweens-and-networking/how-it-works/README.md)
   * [Let the client do it](global-tweens-and-networking/how-it-works/let-the-client-do-it.md)
