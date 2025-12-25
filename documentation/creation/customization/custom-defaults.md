@@ -36,7 +36,9 @@ return {
 	Reverses = false,
 	RepeatCount = 0,
 	
-	FPS = nil
+	FPS = nil,
+	
+	Replicate = false
 }
 ```
 

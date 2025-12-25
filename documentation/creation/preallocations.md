@@ -17,16 +17,14 @@ layout:
 
 # Preallocations
 
-One of the countless optimizations Tween+ does is pre-allocating tween slots.
-
 Here’s all you need to know:
 
 ```diff
-+ The more pre-allocations, the more tweens you can have with quicker start/stop.
++ The more preallocations, the more tweens you can have with quicker start/stop.
 The preallocation amount is equal to
 the amount of tweens you can have with quicker start/stop.
 
-- The more pre-allocations, the more memory/RAM is used.
+- The more preallocations, the more memory/RAM is used.
 The memory consumption can be calculated like this:
 Bytes  =  PreallocationAmount * 8
 ```
@@ -38,5 +36,5 @@ This is a very small optimization, therefore it’s nothing to worry about, rath
 {% endhint %}
 
 {% hint style="info" %}
-The default is 256.
+The default is 256, which is fine as is.
 {% endhint %}
