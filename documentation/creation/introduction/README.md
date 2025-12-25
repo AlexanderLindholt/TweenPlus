@@ -39,7 +39,3 @@ You simply input all the values you would like to tween:
 </strong>	}
 )
 </code></pre>
-
-{% hint style="warning" %}
-In game context, make sure to require the APIMap module on the server, otherwise Tween+ won’t function.
-{% endhint %}

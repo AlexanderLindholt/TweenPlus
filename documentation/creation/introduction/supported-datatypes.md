@@ -33,9 +33,7 @@ layout:
 * NumberSequence
 * ColorSequence
 
-
-
-**Method-based values:**
+**Method-based properties:**
 
 * `Pivot`
 * `Scale`
