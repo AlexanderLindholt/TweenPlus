@@ -29,8 +29,6 @@ It’s crucial that you include these exact packets in the module for Tween+ net
 local Packet = require(script.Packet)
 
 return {
-	Loaded = Packet(),
-	
 	CreateTween = Packet(Packet.NumberU8, Packet.Instance, Packet.Any, Packet.Any),
 	StartTween = Packet(Packet.NumberU8, Packet.Any, Packet.Any),
 	StopTween = Packet(Packet.NumberU8),
