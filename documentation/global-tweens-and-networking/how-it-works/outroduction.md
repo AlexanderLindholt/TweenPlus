@@ -21,4 +21,4 @@ If you’re interested in learning more, you can inspect the Tween+ source code 
 
 The network library’s source code can also be found at [its GitHub](https://github.com/AlexanderLindholt/PacketPlus).
 
-Thanks for reading. If you have any constructive criticism or questions, be sure to let me know — I’ll be happy to listen and answer. 🙂
+Thanks for reading. If you have any questions, make sure to let me know — I’ll be happy to help.

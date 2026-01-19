@@ -20,7 +20,7 @@ layout:
 
 Instead of moving from `0` to `1` at a constant rate (linear), an easing function remaps time so motion isn’t constant but changing.
 
-Usually, easings have 4 directions:
+Usually, easing styles have 4 directions:
 
 * **In**: slow → fast
 * **Out**: fast → slow
@@ -43,12 +43,12 @@ Here’s the required format:
 -- You can add any code here obviously :D
 
 return {
-	-- Single direction:
+	-- You can either write a single direction style:
 	CoolEasing = function(alpha)
 		return alpha
 	end,
 	
-	-- All directions:
+	-- Or you can write an all directions style:
 	SuperCoolEasing = {
 		In = function(alpha)
 			return alpha

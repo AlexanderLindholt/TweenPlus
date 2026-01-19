@@ -27,17 +27,12 @@ A Float64 includes an insane range of numbers all the way down to `-1.7976931348
 
 One example of this optimization principle, is the Tween+ server tween identifiers, which are intentionally limited to the range 0-255, because that’s the range of a UInt8 (unsigned 8-bit integer). This means a maximum of 256 server tweens at once, but also means reduced network traffic.
 
-And compression isn’t limited to numbers — it can be all sorts of data!
-
-
+Keep in mind that compression isn’t limited to numbers — it can be all sorts of data!
 
 But there’s specific data that’s often overlooked.
 
-For example, every time we send something over the network, we also send the identifier for the event, so that the client knows which event we’re talking about — for example, we might have to inform the client that we’re firing the `StartTween` event — that’s what happens behind the scenes when you fire a RemoteEvent in Roblox. Therefore, it’s best to minimize the amount of event fires.
+For example, every time we send something over the network, we also send the identifier for the event, so the client knows which event we’re talking about — for example, we might have to inform the client that we’re firing the `StartTween` event — that’s what happens behind the scenes when you fire a RemoteEvent in Roblox. Therefore, it’s best to minimize the amount of event fires.
 
-If we just send everything through the same event, we can just fire that one event no more than 1 time a frame by combining all of the data, allowing us to store the event identifiers how we want, which can result in slightly reduced network usage if multiple events fire in the same frame.
+If we just send everything through the same event, we can just fire that one event no more than 1 time a frame by combining all of the data, allowing us to store the event identifiers how we want, which can result in slightly further reduced data if multiple events fire in the same frame.
 
-
-
-These optimizations were made possible with Packet, the networking library Tween+ utilizes.\
-Of course it’s a lot more complex behind the scenes — but these are the main principles.
+There you go. Those were the main principles behind the networking library Packet (and its fork, Packet+), which Tween+ relies on for its global tweens feature – albeit it’s far more complex behind the scenes.
