@@ -26,9 +26,10 @@ and many new and amazing features:
 - Support for hidden properties:
   - Pivot.
   - Scale.
+- Custom easing functions.
 - Framerate limit control.
 - Accurate color interpolation ([Oklab](https://observablehq.com/@aras-p/oklab-interpolation-test)).
-- Beautiful, readable syntax.
+- Beautiful, intuitive syntax.
 - ***And much more!***
 <br>
 <br>
