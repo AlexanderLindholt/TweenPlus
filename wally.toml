@@ -1,6 +1,6 @@
 [package]
 name = "alexanderlindholt/tweenplus"
-version = "2.13.0"
+version = "2.13.1"
 description = "An open-source tweening library for Roblox, featuring advanced datatypes, customization, interpolation, and optimization."
 keywords = ["tween", "animation", "interpolation", "oklab", "performance", "optimization", "easing", "efficient", "networking"]
 authors = ["Alexander Lindholt alexanderhlindholt@gmail.com"]
