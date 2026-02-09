@@ -1,0 +1,14 @@
+[package]
+name = "AlexanderLindholt/tweenplus"
+version = "2.13.0"
+description = "An open-source tweening library for Roblox, featuring advanced datatypes, customization, interpolation, and optimization."
+keywords = ["tween", "animation", "interpolation", "oklab", "performance", "optimization", "easing", "efficient", "networking"]
+authors = ["Alexander Lindholt alexanderhlindholt@gmail.com"]
+license = "MIT"
+
+realm = "shared"
+
+registry = "https://github.com/upliftgames/wally-index"
+repository = "https://github.com/AlexanderLindholt/TweenPlus"
+
+include = ["source/**"]
