@@ -1,20 +1,18 @@
 --!optimize 2
 
--- Services.
-local ReflectionService = game:GetService("ReflectionService")
-
 -- Value functions.
 local valueFunctions = require(script.Parent.ValueFunctions)
 
 local normalValueFunctions = valueFunctions.Normal
 local advancedValueFunctions = valueFunctions.Advanced
 
+-- Property validation function.
+local function checkProperty(instance, property)
+	instance[property] = instance[property]
+end
+
 -- Update functions function.
 return function(instance, values)
-	-- Get properties and verify class.
-	local classProperties = ReflectionService:GetPropertiesOfClass(instance.ClassName)
-	if not classProperties then error("Could not identify the class of instance '"..instance:GetFullName().."'.", 3) end
-	
 	-- Verify values and add update functions for each.
 	local updateFunctions = table.create(#values)
 	
@@ -38,31 +36,22 @@ return function(instance, values)
 			end
 		else
 			-- Not attribute.
-			local value
-			for _, data in classProperties do
-				if data.Name == name then
-					local permits = data.Permits
-					if not permits.Read then continue end -- Skip non-readable properties, as they are not relevant.
-					
-					-- Property.
-					if not permits.Write then error("'"..name.."' is not a writable property.", 3) end
-					
-					value = normalValueFunctions[typeof(destination)]
-					if not value then error("'"..typeof(destination).."' data type is not supported.", 3) end
-					
-					local original = instance[name]
-					value = value(original, destination)
-					
-					updateFunctions[index] = function(alpha)
-						instance[name] = value(alpha)
-					end
-					
-					break
+			if pcall(checkProperty, instance, name) then
+				-- Validate.
+				local value = instance[name]
+				local dataType = if value == nil then "Instance" else typeof(value)
+				value = normalValueFunctions[dataType]
+				if not value then error("'"..dataType.."' data type is not supported.", 3) end
+				
+				-- Set up.
+				local original = instance[name]
+				value = value(original, destination)
+				
+				updateFunctions[index] = function(alpha)
+					instance[name] = value(alpha)
 				end
-			end
-			
-			if not value then
-				value = advancedValueFunctions[name]
+			else
+				local value = advancedValueFunctions[name]
 				if value then
 					-- Hidden property.
 					if not instance:IsA(value.Target) then error("'"..instance:GetFullName().."' doesn't support "..name..".", 3) end
