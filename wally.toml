@@ -10,5 +10,3 @@ realm = "shared"
 
 registry = "https://github.com/upliftgames/wally-index"
 repository = "https://github.com/AlexanderLindholt/TweenPlus"
-
-include = ["source/"]
