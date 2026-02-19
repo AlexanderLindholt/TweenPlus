@@ -3,7 +3,6 @@
 
 -- Services.
 local CollectionService = game:GetService("CollectionService")
-local ServerStorage = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
@@ -21,7 +20,7 @@ if packets then
 	}
 	local tweenPackets = {}
 	for _, name in requiredPackets do
-		if packets[name] then table.insert(tweenPackets, name) end
+		if packets[name] then tweenPackets[name] = true end
 	end
 	if #tweenPackets < #requiredPackets then
 		packets = nil
@@ -85,9 +84,6 @@ local tweensAmount = 0
 
 -- Tween functions.
 local function stop(tween: InternalTween)
-	-- Verify playback state.
-	if not tween.Playing then return end
-	
 	-- Set playing state.
 	tween.Playing = nil
 	

@@ -109,9 +109,6 @@ local function destroy(tween: InternalTween)
 end
 
 local function start(tween: InternalTween, startOverride)
-	-- Verify playback state.
-	if tween.Playing then return end
-	
 	-- Set playing state.
 	tween.Playing = true
 	
