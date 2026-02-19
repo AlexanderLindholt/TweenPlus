@@ -3,7 +3,7 @@ name = "alexanderlindholt/tweenplus"
 version = "2.13.2"
 description = "An open-source tweening library for Roblox, featuring advanced datatypes, customization, interpolation, and optimization."
 keywords = ["tween", "animation", "interpolation", "oklab", "performance", "optimization", "easing", "efficient", "networking"]
-authors = ["Alexander Lindholt alexanderhlindholt@gmail.com"]
+authors = ["Alexander Lindholt"]
 license = "MIT"
 
 realm = "shared"
