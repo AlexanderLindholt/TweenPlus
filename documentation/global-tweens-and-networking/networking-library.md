@@ -1,20 +1,3 @@
----
-layout:
-  width: default
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
-  metadata:
-    visible: true
----
-
 # Networking library
 
 Get [Packet+](https://github.com/AlexanderLindholt/PacketPlus) (my fork of Packet) from GitHub:

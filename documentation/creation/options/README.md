@@ -1,19 +1,5 @@
 ---
 icon: ballot
-layout:
-  width: default
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
-  metadata:
-    visible: true
 ---
 
 # Options
@@ -23,7 +9,7 @@ Those not provided will fallback to their respective defaults.
 
 Example:
 
-<pre class="language-lua"><code class="lang-lua">local tween = Tween(
+<pre class="language-luau"><code class="lang-luau">local tween = Tween(
 	workspace.Part,
 	{
 		Position = Vector3.new(0, 10, 0),
