@@ -18,15 +18,15 @@ if packets then
 		"ResetTween",
 		"DestroyTween"
 	}
-	local tweenPackets = {}
+	local missingPackets = {}
 	for _, name in requiredPackets do
-		if packets[name] then tweenPackets[name] = true end
+		if not packets[name] then table.insert(missingPackets, name) end
 	end
-	if #tweenPackets < #requiredPackets then
+	if #missingPackets > 0 then
 		packets = nil
-		if #tweenPackets > 0 then
-			for _, name in requiredPackets do
-				if not tweenPackets[name] then packets = nil warn("Packet '"..name.."' is missing for global tweening to function.") end
+		if #missingPackets ~= #requiredPackets then
+			for _, name in missingPackets do
+				warn("Packet '"..name.."' is missing for global tweening to function.")
 			end
 		end
 	end
