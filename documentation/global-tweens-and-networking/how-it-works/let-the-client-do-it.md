@@ -1,20 +1,3 @@
----
-layout:
-  width: default
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
-  metadata:
-    visible: true
----
-
 # Let the client do it
 
 The Roblox server is limited to 60 frames per second, and sending large amounts of data every frame is expensive, as not all clients have the bandwidth to handle it efficiently. To address this, we can transfer the hard work to the client.
