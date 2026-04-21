@@ -114,8 +114,6 @@ local function destroy(tween: InternalTween)
 	-- Disconnect new player connection.
 	local playerConnection = tween.PlayerConnection
 	if playerConnection then playerConnection:Disconnect() end
-	-- Disconnect destroy connection.
-	tween.DestroyConnection:Disconnect()
 	
 	-- Free up identifier.
 	globalIdentifiers[tween.Identifier] = true
