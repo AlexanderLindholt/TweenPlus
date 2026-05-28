@@ -1,12 +1,4 @@
 -- Signal types from Signal+.
-export type Connection = {
-	Connected: boolean,
-	Disconnect: typeof(
-		-- Removes the connection from the signal.
-		-- <strong>The connection’s data remains.</strong>
-		function(connection: Connection) end
-	)
-}
 export type Signal<Parameters...> = {
 	Connect: typeof(
 		-- Connects a function.
@@ -22,7 +14,7 @@ export type Signal<Parameters...> = {
 	),
 	
 	Fire: typeof(
-		-- Runs all connected functions, and resumes all waiting threads.
+		-- Runs all connected functions and resumes all waiting threads.
 		function(signal: Signal<Parameters...>, ...: Parameters...) end
 	),
 	
@@ -35,6 +27,15 @@ export type Signal<Parameters...> = {
 		-- Erases all connections and methods.
 		-- <strong>To fully erase, also remove all references to the signal.</strong>
 		function(signal: Signal<Parameters...>) end
+	)
+}
+export type Connection = {
+	Signal: Signal,
+	Connected: boolean,
+	Disconnect: typeof(
+		-- Removes the connection from the signal.
+		-- <strong>The connection’s data remains.</strong>
+		function(connection: Connection) end
 	)
 }
 

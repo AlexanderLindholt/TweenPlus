@@ -10,12 +10,12 @@ local plugin = script:FindFirstAncestorOfClass("Plugin")
 
 -- Network packets.
 local packets
-if not plugin then -- Game context.
+if not plugin and RunService:IsRunning() then -- Game context.
 	packets = CollectionService:GetTagged("Packets")[1]
 	if packets then packets = require(packets) end
 end
 
--- Signal library.                                                                                                                                                                                                                                                                                                                                                                                          
+-- Signal library.
 local Signal
 if plugin then
 	for _, instance in plugin:GetDescendants() do
@@ -398,6 +398,7 @@ if packets then
 			for _, update in tween.UpdateFunctions do update(0) end
 		end)
 		packets.DestroyTween.OnClientEvent:Connect(function(identifier)
+			print(identifier)
 			local tween = globalTweens[identifier]
 			if not tween then return end
 			
@@ -416,6 +417,8 @@ return function(instance, values, options)
 	local updateFunctions = createUpdateFunctions(instance, values)
 	
 	-- Handle options.
+	if not options then options = {} end
+	
 	local tweenTime = options.Time
 	if type(tweenTime) ~= "number" then
 		tweenTime = defaults.InverseTime

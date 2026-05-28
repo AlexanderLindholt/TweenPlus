@@ -3,6 +3,7 @@
 
 -- Services.
 local CollectionService = game:GetService("CollectionService")
+local ServerStorage = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
@@ -116,7 +117,8 @@ local function destroy(tween: InternalTween)
 	if playerConnection then playerConnection:Disconnect() end
 	
 	-- Free up identifier.
-	globalIdentifiers[tween.Identifier] = true
+	local identifier = tween.Identifier
+	if identifier then globalIdentifiers[identifier] = true end
 	
 	-- Ensure no playback.
 	if tween.Playing then
@@ -347,11 +349,12 @@ return function(instance, values, options)
 	if packets then -- Valid networking setup.
 		if replicate then
 			globalIdentifier = next(globalIdentifiers)
+			globalIdentifiers[globalIdentifier] = nil
 			if not globalIdentifier then error("Maximum global tweens (256) exceeded. Destroy tweens to free up space.", 2) end
 		end
 	else -- Invalid networking setup.
 		if replicate then
-			error("Global tweening not available. Please set up necessary networking or disable replicate.")
+			error("Global tweening not available. Please set up necessary networking or disable replicate.", 2)
 		end
 	end
 	
@@ -360,6 +363,8 @@ return function(instance, values, options)
 	
 	-- Set up tween.
 	local tween
+	
+	if not options then options = {} end
 	
 	if replicate then -- Global tween.
 		-- Handle options.
