@@ -12,7 +12,7 @@
   * [Options list](creation/options/options-list.md)
   * [FPS](creation/options/fps.md)
   * [Replicate](creation/options/replicate.md)
-  * [Custom defaults](creation/options/custom-defaults.md)
+  * [Custom defaults](creation/customization/custom-defaults.md)
 * [Custom easing functions](creation/custom-easing-functions.md)
 * [Preallocations](creation/preallocations.md)
 

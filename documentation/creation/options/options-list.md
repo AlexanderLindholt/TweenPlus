@@ -5,7 +5,7 @@ icon: list
 # Options list
 
 {% hint style="success" %}
-The following defaults can be overwritten by [custom defaults](custom-defaults.md).
+The following defaults can be overwritten by [custom defaults](../customization/custom-defaults.md).
 {% endhint %}
 
 * **Time:** number\
