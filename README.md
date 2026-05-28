@@ -11,34 +11,33 @@ datatypes, customization, interpolation, and optimization.
 ​<br>
 <br>
 
-# 🌟 More capabilities!
-Experience animation in Roblox like never before.<br>
+# 🌟 Like never before!
+Experience tweening on Roblox like never before.<br>
 <br>
-
 With all the features of TweenService,<br>
-and many new and amazing features:
+and many new amazing additions:
 - Advanced networking for efficient global tweening.
+- Native [Bézier curves](https://en.wikipedia.org/wiki/B%C3%A9zier_curve) support.
 - [Attributes](https://create.roblox.com/docs/scripting/attributes) support.
 - Support for advanced data types:
   - Sequences.
   - Ranges.
   - Strings.
-- Support for hidden properties:
+- Support for method-based properties:
   - Pivot.
   - Scale.
 - Custom easing functions.
-- Framerate limit control.
 - Accurate color interpolation ([Oklab](https://observablehq.com/@aras-p/oklab-interpolation-test)).
+- Framerate limit control.
 - Beautiful, intuitive syntax.
 - ***And much more!***
+<br>
+It’s safe to say that Tween+ does it all, without compromise!
+
 <br>
 <br>
 
 # ⚡ Fast, stable, intuitive.
-- Blazingly fast, lag-free performance.
-- Catches errors with clear feedback.
-- Proper typing and documentation.
-​<br>
-<br>
-
-# Check out showcases and more information [here](https://devforum.roblox.com/t/3599638)!
+- Blazingly fast, ultra-optimized, lag-free.
+- Precise feedback, strict validation, robust design.
+- Proper typing, clear documentation, easy syntax.
