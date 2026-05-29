@@ -37,7 +37,7 @@ It’s safe to say that Tween+ does it all, without compromise!
 <br>
 <br>
 
-# ⚡ Fast, stable, intuitive.
+# ⚡ Fast. Stable. Intuitive.
 - Blazingly fast, ultra-optimized, lag-free.
 - Precise feedback, strict validation, robust design.
 - Proper typing, clear documentation, easy syntax.
