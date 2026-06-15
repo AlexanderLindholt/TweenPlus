@@ -14,6 +14,7 @@
   * [Replicate](creation/options/replicate.md)
   * [Custom defaults](creation/customization/custom-defaults.md)
 * [Custom easing functions](creation/custom-easing-functions.md)
+* [Bézier curves](creation/bezier-curves.md)
 * [Preallocations](creation/preallocations.md)
 
 ## Tween usage
