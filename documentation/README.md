@@ -34,6 +34,7 @@ layout:
 * Find the file in your file explorer.
 * Drag the file into Roblox Studio.
 
+\
 **Bonus:** The package will auto-update if you enable it in the `PackageLink` inside.
 {% endtab %}
 
@@ -45,6 +46,24 @@ layout:
 * Go to the `Inventory` tab.
 * Click on `Tween+` to insert.
 {% endtab %}
+
+{% tab title="Wally" %}
+<a href="https://wally.run/package/alexanderlindholt/tweenplus" class="button primary">View Wally Package</a>
+
+* Open project directory in a terminal.
+* Initialize with `wally init`.
+* Add dependency in the  `wally.toml` file:
+
+```toml
+[dependencies]
+TweenPlus = "alexanderlindholt/tweenplus@*"
+```
+
+* Install package with `wally install`.
+
+\
+Learn more at [wally.run](https://wally.run/).
+{% endtab %}
 {% endtabs %}
 {% endstep %}
 
@@ -54,3 +73,4 @@ layout:
 Find a great place for the module, where other scripts can reference it.
 {% endstep %}
 {% endstepper %}
+
