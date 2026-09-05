@@ -1,6 +1,9 @@
 {
   "name": "tweenplus",
   "tree": {
-    "$path": "source"
+    "$path": "source",
+    "Packages": {
+      "$path": "Packages"
+    }
   }
 }

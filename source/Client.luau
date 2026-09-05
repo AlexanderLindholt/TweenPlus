@@ -2,36 +2,16 @@
 --!native
 
 -- Services.
-local CollectionService = game:GetService("CollectionService")
 local RunService = game:GetService("RunService")
 
 -- Attempt to find the plugin object.
 local plugin = script:FindFirstAncestorOfClass("Plugin")
 
 -- Network packets.
-local packets
-if not plugin and RunService:IsRunning() then -- Game context.
-	packets = CollectionService:GetTagged("Packets")[1]
-	if packets then packets = require(packets) end
-end
+local packets = require(script.Parent.Packets)
 
 -- Signal library.
-local Signal
-if plugin then
-	for _, instance in plugin:GetDescendants() do
-		if instance:HasTag("Signal") then
-			Signal = require(instance)
-			if type(Signal) == "table" and Signal.new then Signal = Signal.new end
-			break
-		end
-	end
-else -- Game context.
-	Signal = CollectionService:GetTagged("Signal")[1]
-	if Signal then
-		Signal = require(Signal)
-		if type(Signal) == "table" and Signal.new then Signal = Signal.new end
-	end
-end
+local Signal = require(script.Parent.Packages.signalplus)
 
 -- Time function.
 local getTime = if plugin then os.clock else time
@@ -55,7 +35,7 @@ local types = require(data.Types)
 type InternalTween = types.InternalTween
 
 -- Active tweens collection.
-local tweens: {InternalTween} = table.create(script.Parent:GetAttribute("TweenPreallocations"))
+local tweens: {InternalTween} = table.create(256) -- fix: just use 256 instead of getting an attribute value
 local tweensAmount = 0
 
 -- Tween functions.
@@ -94,16 +74,15 @@ local function destroy(tween: InternalTween)
 		tweensAmount -= 1
 		
 		-- Fire stopped signal.
-		if Signal then tween.Stopped:Fire() end
+		tween.Stopped:Fire()
 	end
 	
 	-- Destroy signals.
-	if Signal then
-		tween.Updated:Destroy()
-		tween.Started:Destroy()
-		tween.Stopped:Destroy()
-		tween.Completed:Destroy()
-	end
+	tween.Updated:Destroy()
+	tween.Started:Destroy()
+	tween.Stopped:Destroy()
+	tween.Completed:Destroy()
+
 	-- Unlink methods.
 	setmetatable(tween, nil)
 end
@@ -123,7 +102,7 @@ local function start(tween: InternalTween, startOverride)
 				if otherValues[value] ~= nil then
 					if otherTween.Playing then
 						stop(otherTween)
-						if otherTween.Stopped then otherTween.Stopped:Fire() end
+						otherTween.Stopped:Fire()
 					end
 					break
 				end
@@ -190,7 +169,7 @@ do
 			
 			-- Fire update signal.
 			local updateSignal = tween.Updated
-			if updateSignal then updateSignal:Fire() end
+			if updateSignal then tween.Updated:Fire() end
 			
 			-- Phase completion stuff.
 			if phaseCompleted then
@@ -248,21 +227,21 @@ Tween.__index = Tween
 Tween.Start = function(tween: InternalTween)
 	if not tween.Playing then
 		start(tween)
-		if Signal then tween.Started:Fire() end
+		tween.Started:Fire()
 	end
 	return tween
 end
 Tween.Stop = function(tween: InternalTween)
 	if tween.Playing then
 		stop(tween)
-		if Signal then tween.Stopped:Fire() end
+		tween.Stopped:Fire()
 	end
 	return tween
 end
 Tween.Reset = function(tween: InternalTween)
 	if tween.Playing then
 		stop(tween)
-		if Signal then tween.Stopped:Fire() end
+		tween.Stopped:Fire()
 	end
 	tween.WaitTime = nil
 	tween.StopTime = 0
@@ -275,136 +254,133 @@ end
 Tween.Destroy = destroy
 
 -- Global tweens setup.
-if packets then
-	local requiredPackets = {
-		"CreateTween",
-		"StartTween",
-		"StopTween",
-		"ResetTween",
-		"DestroyTween"
-	}
-	local tweenPackets = 0
-	for _, name in requiredPackets do
-		if packets[name] then tweenPackets += 1 end
-	end
-	if tweenPackets == #requiredPackets then
-		requiredPackets, tweenPackets = nil -- Erase unnecessary data.
+local requiredPackets = {
+	"CreateTween",
+	"StartTween",
+	"StopTween",
+	"ResetTween",
+	"DestroyTween"
+}
+local tweenPackets = 0
+for _, name in requiredPackets do
+	if packets[name] then tweenPackets += 1 end
+end
+if tweenPackets == #requiredPackets then
+	requiredPackets, tweenPackets = nil -- Erase unnecessary data.
+	
+	local globalTweens = table.create(256) -- Preallocate the maximum amount of global tweens.
+	
+	local function serverDestroy(tween: InternalTween)
+		-- Remove from collection.
+		globalTweens[tween.Identifier] = nil
 		
-		local globalTweens = table.create(256) -- Preallocate the maximum amount of global tweens.
-		
-		local function serverDestroy(tween: InternalTween)
-			-- Remove from collection.
-			globalTweens[tween.Identifier] = nil
-			
-			-- Ensure no playback.
-			if tween.Playing then
-				-- Tween removal.
-				local index = tween.Index
-				if index == tweensAmount then
-					tweens[tweensAmount] = nil
-				else
-					local last = tweens[tweensAmount]
-					last.Index = index
-					tweens[index] = last
-					tweens[tweensAmount] = nil
-				end
-				tweensAmount -= 1
+		-- Ensure no playback.
+		if tween.Playing then
+			-- Tween removal.
+			local index = tween.Index
+			if index == tweensAmount then
+				tweens[tweensAmount] = nil
+			else
+				local last = tweens[tweensAmount]
+				last.Index = index
+				tweens[index] = last
+				tweens[tweensAmount] = nil
 			end
-			
-			-- Unlink methods.
-			setmetatable(tween, nil)
+			tweensAmount -= 1
 		end
 		
-		packets.CreateTween.OnClientEvent:Connect(function(identifier, instance, values, options)
-			-- Argument validation.
-			if not instance then error("Could not find instance on client.") end
-			
-			-- Handle values.
-			local updateFunctions = createUpdateFunctions(instance, values)
-			
-			-- Handle options.
-			local easingFunction = easingFunctions[options[2] or defaults.EasingStyle]
-			if type(easingFunction) == "table" then
-				easingFunction = easingFunction[options[3] or defaults.EasingDirection]
-			end
-			
-			-- Create tween.
-			local tween = {
-				-- Identifier.
-				Identifier = identifier,
-				
-				-- Main arguments.
-				Instance = instance,
-				Values = values,
-				
-				-- Value functions.
-				UpdateFunctions = updateFunctions,
-				
-				-- Options.
-				InverseTweenTime = options[1] or defaults.InverseTime,
-				Ease = easingFunction,
-				DelayTime = options[4] or defaults.DelayTime,
-				Reverses = options[5] or defaults.Reverses,
-				RepeatCount = options[6] or defaults.RepeatCount,
-				Interval = options[7] or defaults.Interval,
-				
-				-- Time markers.
-				StartTime = 0,
-				StopTime = 0,
-				
-				-- Trackers.
-				Repetitions = 0
-			}
-			
-			-- Store the tween with its given identifier.
-			globalTweens[identifier] = tween
-			
-			-- Handle instance destroy.
-			instance.Destroying:Once(function()
-				serverDestroy(tween)
-			end)
-		end)
+		-- Unlink methods.
+		setmetatable(tween, nil)
+	end
+	
+	packets.CreateTween.OnClientEvent:Connect(function(identifier, instance, values, options)
+		-- Argument validation.
+		if not instance then error("Could not find instance on client.") end
 		
-		packets.StartTween.OnClientEvent:Connect(function(identifier, fireTime, runTime, repetitions)
-			local tween = globalTweens[identifier]
-			if not tween then return end
+		-- Handle values.
+		local updateFunctions = createUpdateFunctions(instance, values)
+		
+		-- Handle options.
+		local easingFunction = easingFunctions[options[2] or defaults.EasingStyle]
+		if type(easingFunction) == "table" then
+			easingFunction = easingFunction[options[3] or defaults.EasingDirection]
+		end
+		
+		-- Create tween.
+		local tween = {
+			-- Identifier.
+			Identifier = identifier,
 			
-			if repetitions then
-				tween.Repetitions = repetitions
-				if tween.Reverses then
-					tween.Reverse = if repetitions%2 == 1 then true else nil
-				end
-			end
-			if tween.StopTime then
-				if runTime then
-					tween.StartTime = getTime() - runTime - (workspace:GetServerTimeNow() - fireTime)
-					start(tween, true)
-				else
-					start(tween)
-				end
-			end
-		end)
-		packets.StopTween.OnClientEvent:Connect(function(identifier)
-			local tween = globalTweens[identifier]
-			if not tween then return end
+			-- Main arguments.
+			Instance = instance,
+			Values = values,
 			
-			if tween.Playing then stop(tween) end
-		end)
-		packets.ResetTween.OnClientEvent:Connect(function(identifier)
-			local tween = globalTweens[identifier]
-			if not tween then return end
+			-- Value functions.
+			UpdateFunctions = updateFunctions,
 			
-			if tween.Playing then stop(tween) end
-			for _, update in tween.UpdateFunctions do update(0) end
-		end)
-		packets.DestroyTween.OnClientEvent:Connect(function(identifier)
-			print(identifier)
-			local tween = globalTweens[identifier]
-			if not tween then return end
+			-- Options.
+			InverseTweenTime = options[1] or defaults.InverseTime,
+			Ease = easingFunction,
+			DelayTime = options[4] or defaults.DelayTime,
+			Reverses = options[5] or defaults.Reverses,
+			RepeatCount = options[6] or defaults.RepeatCount,
+			Interval = options[7] or defaults.Interval,
 			
+			-- Time markers.
+			StartTime = 0,
+			StopTime = 0,
+			
+			-- Trackers.
+			Repetitions = 0
+		}
+		
+		-- Store the tween with its given identifier.
+		globalTweens[identifier] = tween
+		
+		-- Handle instance destroy.
+		instance.Destroying:Once(function()
 			serverDestroy(tween)
 		end)
-	end
+	end)
+	
+	packets.StartTween.OnClientEvent:Connect(function(identifier, fireTime, runTime, repetitions)
+		local tween = globalTweens[identifier]
+		if not tween then return end
+		
+		if repetitions then
+			tween.Repetitions = repetitions
+			if tween.Reverses then
+				tween.Reverse = if repetitions%2 == 1 then true else nil
+			end
+		end
+		if tween.StopTime then
+			if runTime then
+				tween.StartTime = getTime() - runTime - (workspace:GetServerTimeNow() - fireTime)
+				start(tween, true)
+			else
+				start(tween)
+			end
+		end
+	end)
+	packets.StopTween.OnClientEvent:Connect(function(identifier)
+		local tween = globalTweens[identifier]
+		if not tween then return end
+		
+		if tween.Playing then stop(tween) end
+	end)
+	packets.ResetTween.OnClientEvent:Connect(function(identifier)
+		local tween = globalTweens[identifier]
+		if not tween then return end
+		
+		if tween.Playing then stop(tween) end
+		for _, update in tween.UpdateFunctions do update(0) end
+	end)
+	packets.DestroyTween.OnClientEvent:Connect(function(identifier)
+		local tween = globalTweens[identifier]
+		if not tween then return end
+		
+		serverDestroy(tween)
+	end)
 end
 
 -- Local tween creation.
@@ -484,12 +460,10 @@ return function(instance, values, options)
 	}, Tween)
 	
 	-- Signals.
-	if Signal then
-		tween.Updated = Signal()
-		tween.Started = Signal()
-		tween.Stopped = Signal()
-		tween.Completed = Signal()
-	end
+	tween.Updated = Signal()
+	tween.Started = Signal()
+	tween.Stopped = Signal()
+	tween.Completed = Signal()
 	
 	-- Handle instance destroy.
 	instance.Destroying:Once(function()

@@ -2,43 +2,33 @@
 --!native
 
 -- Services.
-local CollectionService = game:GetService("CollectionService")
-local ServerStorage = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
 -- Get and verify network packets.
-local packets = CollectionService:GetTagged("Packets")[1]
-if packets then
-	packets = require(packets)
-	
-	local requiredPackets = {
-		"CreateTween",
-		"StartTween",
-		"StopTween",
-		"ResetTween",
-		"DestroyTween"
-	}
-	local missingPackets = {}
-	for _, name in requiredPackets do
-		if not packets[name] then table.insert(missingPackets, name) end
-	end
-	if #missingPackets > 0 then
-		packets = nil
-		if #missingPackets ~= #requiredPackets then
-			for _, name in missingPackets do
-				warn("Packet '"..name.."' is missing for global tweening to function.")
-			end
+local packets = require(script.Parent.Packets)
+local requiredPackets = {
+	"CreateTween",
+	"StartTween",
+	"StopTween",
+	"ResetTween",
+	"DestroyTween"
+}
+local missingPackets = {}
+for _, name in requiredPackets do
+	if not packets[name] then table.insert(missingPackets, name) end
+end
+if #missingPackets > 0 then
+	packets = nil
+	if #missingPackets ~= #requiredPackets then
+		for _, name in missingPackets do
+			warn("Packet '"..name.."' is missing for global tweening to function.")
 		end
 	end
 end
 
 -- Signal library.
-local Signal = CollectionService:GetTagged("Signal")[1]
-if Signal then
-	Signal = require(Signal)
-	if type(Signal) == "table" and Signal.new then Signal = Signal.new end
-end
+local Signal = require(script.Parent.Packages.signalplus)
 
 -- Directories.
 local root = script.Parent
@@ -80,7 +70,7 @@ for identifier = 0, 255 do
 end
 
 -- Active tweens collection.
-local tweens: {InternalTween} = table.create(script.Parent:GetAttribute("TweenPreallocations"))
+local tweens: {InternalTween} = table.create(256) -- fix: just use 256 instead of getting an attribute value
 local tweensAmount = 0
 
 -- Tween functions.
@@ -109,7 +99,7 @@ local function stop(tween: InternalTween)
 	tween.StopTime = time()
 	
 	-- Fire stopped signal.
-	if Signal then tween.Stopped:Fire() end
+	if tween.Stopped then tween.Stopped:Fire() end
 end
 local function destroy(tween: InternalTween)
 	-- Disconnect new player connection.
@@ -142,16 +132,15 @@ local function destroy(tween: InternalTween)
 		tweensAmount -= 1
 		
 		-- Fire stopped signal.
-		if Signal then tween.Stopped:Fire() end
+		if tween.Stopped then tween.Stopped:Fire() end
 	end
 	
 	-- Destroy signals.
-	if Signal then
-		tween.Updated:Destroy()
-		tween.Started:Destroy()
-		tween.Stopped:Destroy()
-		tween.Completed:Destroy()
-	end
+	if tween.Updated then tween.Updated:Destroy() end
+ 	if tween.Started then tween.Started:Destroy() end
+	if tween.Stopped then tween.Stopped:Destroy() end
+	if tween.Completed then tween.Completed:Destroy() end
+
 	-- Unlink methods.
 	setmetatable(tween, nil)
 end
@@ -206,9 +195,10 @@ RunService.PreSimulation:Connect(function()
 		tween.Alpha = alpha
 		
 		-- Fire update signal.
+		local updateSignal = tween.Updated
 		if Signal then
 			tween.Alpha = alpha
-			tween.Updated:Fire()
+			if updateSignal then updateSignal:Fire() end
 		end
 		
 		-- Phase completion stuff.
@@ -221,7 +211,8 @@ RunService.PreSimulation:Connect(function()
 					tween.Reverse = nil
 				else
 					stop(tween)
-					if Signal then
+
+					if updateSignal then
 						tween.Stopped:Fire()
 						tween.Completed:Fire()
 					end
@@ -240,7 +231,8 @@ RunService.PreSimulation:Connect(function()
 						tween.StartTime = currentTime
 					else
 						stop(tween)
-						if Signal then
+
+						if updateSignal then
 							tween.Stopped:Fire()
 							tween.Completed:Fire()
 						end
@@ -260,8 +252,12 @@ Tween.Start = function(tween: InternalTween)
 	if tween.Playing then return tween end
 	
 	-- Notify clients.
-	for _, player in Players:GetPlayers() do
-		startTweenPacket:FireClient(player, tween.Identifier)
+	-- fix: check if it even has an identifier
+	-- 		if it doesnt, it probably has "Replicate" set to false, otherwise it would have an identifier
+	if tween.Identifier then
+		for _, player in Players:GetPlayers() do
+			startTweenPacket:FireClient(player, tween.Identifier)
+		end
 	end
 	
 	-- Set playing state.
@@ -297,15 +293,17 @@ Tween.Start = function(tween: InternalTween)
 	tween.Index = tweensAmount
 	
 	-- Fire started signal.
-	if Signal then tween.Started:Fire() end
+	if tween.Started then tween.Started:Fire() end
 	
 	-- Return self.
 	return tween
 end
 Tween.Stop = function(tween: InternalTween)
 	if tween.Playing then
-		for _, player in Players:GetPlayers() do
-			stopTweenPacket:FireClient(player, tween.Identifier)
+		if tween.Identifier then
+			for _, player in Players:GetPlayers() do
+				stopTweenPacket:FireClient(player, tween.Identifier)
+			end
 		end
 		
 		stop(tween)
@@ -313,8 +311,10 @@ Tween.Stop = function(tween: InternalTween)
 	return tween
 end
 Tween.Reset = function(tween: InternalTween)
-	for _, player in Players:GetPlayers() do
-		resetTweenPacket:FireClient(player, tween.Identifier)
+	if tween.Identifier then
+		for _, player in Players:GetPlayers() do
+			resetTweenPacket:FireClient(player, tween.Identifier)
+		end
 	end
 	
 	if tween.Playing then stop(tween) end
@@ -328,8 +328,10 @@ Tween.Reset = function(tween: InternalTween)
 	return tween
 end
 Tween.Destroy = function(tween: InternalTween)
-	for _, player in Players:GetPlayers() do
-		destroyTweenPacket:FireClient(player, tween.Identifier)
+	if tween.Identifier then
+		for _, player in Players:GetPlayers() do
+			destroyTweenPacket:FireClient(player, tween.Identifier)
+		end		
 	end
 	
 	destroy(tween)
