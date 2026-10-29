@@ -4,8 +4,8 @@
 
 ## Fundamentals
 
-* [Introduction](fundamentals/introduction/README.md)
-  * [Supported datatypes](fundamentals/introduction/supported-datatypes.md)
+* [Introduction](fundamentals/introduction.md)
+* [Supported datatypes](fundamentals/supported-datatypes.md)
 * [Attributes](fundamentals/attributes.md)
 * [Hidden properties](fundamentals/hidden-properties.md)
 * [Options](fundamentals/options/README.md)

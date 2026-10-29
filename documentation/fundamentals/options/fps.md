@@ -17,13 +17,13 @@ layout:
     visible: true
   actions:
     visible: true
+  anchors:
+    visible: true
 ---
 
 # FPS
 
-`FPS` is one of the many options.
-
-It controls the playback target [FPS](https://en.wikipedia.org/wiki/Frame_rate).\
+This option controls the playback target [FPS](https://en.wikipedia.org/wiki/Frame_rate).\
 Defaults to infinite, meaning it will match the rest of the application.
 
 {% hint style="info" %}
