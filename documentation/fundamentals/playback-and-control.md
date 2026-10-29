@@ -1,6 +1,29 @@
-# Playback and control
+---
+layout:
+  width: default
+  title:
+    visible: true
+  description:
+    visible: false
+  tableOfContents:
+    visible: true
+  outline:
+    visible: true
+  pagination:
+    visible: true
+  metadata:
+    visible: true
+  tags:
+    visible: true
+  actions:
+    visible: true
+  anchors:
+    visible: true
+---
 
-After creating a new tween, you can use the following methods:
+# Methods
+
+After creating a tween, you can use the following methods:
 
 * [**Start**](#user-content-fn-1)[^1]
 * [**Stop**](#user-content-fn-2)[^2]

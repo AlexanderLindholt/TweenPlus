@@ -1,3 +1,26 @@
+---
+layout:
+  width: default
+  title:
+    visible: true
+  description:
+    visible: false
+  tableOfContents:
+    visible: true
+  outline:
+    visible: true
+  pagination:
+    visible: true
+  metadata:
+    visible: true
+  tags:
+    visible: true
+  actions:
+    visible: true
+  anchors:
+    visible: true
+---
+
 # Introduction
 
 When you require the module, it’ll return a function, which you can use to create tweens:
@@ -11,7 +34,7 @@ local tween = Tween(
 )
 ```
 
-You simply input all the values you would like to tween:
+You simply input all the values you would like to tween in a table:
 
 <pre class="language-luau"><code class="lang-luau">local tween = Tween(
 	workspace.Part,

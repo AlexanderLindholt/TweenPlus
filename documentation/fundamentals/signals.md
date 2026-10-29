@@ -1,12 +1,35 @@
+---
+layout:
+  width: default
+  title:
+    visible: true
+  description:
+    visible: false
+  tableOfContents:
+    visible: true
+  outline:
+    visible: true
+  pagination:
+    visible: true
+  metadata:
+    visible: true
+  tags:
+    visible: true
+  actions:
+    visible: true
+  anchors:
+    visible: true
+---
+
 # Signals
 
 You can enable signals by installing a signal library.
 
 {% hint style="info" %}
-[Signal+](https://devforum.roblox.com/t/3552231) is highly recommended because it’s the best.
+[Signal+](https://devforum.roblox.com/t/3552231) is highly recommended
 {% endhint %}
 
-Make sure to [tag](https://create.roblox.com/docs/studio/properties#instance-tags) the module `Signal`.
+Simply [tag](https://create.roblox.com/docs/studio/properties#instance-tags) the module `Signal`.
 
 
 
