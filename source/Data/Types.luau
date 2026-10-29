@@ -61,7 +61,7 @@ export type InternalTween = {
 	RepeatCount: number,
 	Reverses: boolean,
 	Interval: number?,
-	Table: {},
+	Once: boolean,
 	
 	StartTime: number,
 	StopTime: number?,

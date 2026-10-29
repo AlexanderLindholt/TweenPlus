@@ -327,10 +327,10 @@ if userFunctions then
 	userFunctions = require(userFunctions)
 	
 	local directions = {
-		In = true,
-		Out = true,
-		InOut = true,
-		OutIn = true
+		"In",
+		"Out",
+		"InOut",
+		"OutIn"
 	}
 	
 	for key, value in userFunctions do

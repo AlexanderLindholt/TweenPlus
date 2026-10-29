@@ -396,17 +396,17 @@ return {
 						local invertedAlphaSquared = invertedAlpha*invertedAlpha
 						local alphaSquared = alpha*alpha
 						
-						return (invertedAlphaSquared*invertedAlpha)*a 
-							+ (3*invertedAlphaSquared*alpha)*c 
-							+ (3*invertedAlpha*alphaSquared)*d 
+						return (invertedAlphaSquared*invertedAlpha)*a
+							+ (3*invertedAlphaSquared*alpha)*c
+							+ (3*invertedAlpha*alphaSquared)*d
 							+ (alphaSquared*alpha)*b
 					end
 				end
 				
 				return function(alpha)
 					local invertedAlpha = 1 - alpha
-					return (invertedAlpha*invertedAlpha)*a 
-						+ (2*invertedAlpha*alpha)*c 
+					return (invertedAlpha*invertedAlpha)*a
+						+ (2*invertedAlpha*alpha)*c
 						+ (alpha*alpha)*b
 				end
 			end,
@@ -497,43 +497,6 @@ return {
 						weight1*aXOffset + weight2*cXOffset + weight3*bXOffset,
 						weight1*aYScale + weight2*cYScale + weight3*bYScale,
 						weight1*aYOffset + weight2*cYOffset + weight3*bYOffset
-					)
-				end
-			end,
-			
-			UDim = function(a, b, c, d)
-				local aScale, aOffset = a.Scale, a.Offset
-				local bScale, bOffset = b.Scale, b.Offset
-				local cScale, cOffset = c.Scale, c.Offset
-				
-				if d then
-					local dScale, dOffset = d.Scale, d.Offset
-					return function(alpha)
-						local invertedAlpha = 1 - alpha
-						local invertedAlphaSquared = invertedAlpha * invertedAlpha
-						local alphaSquared = alpha * alpha
-						
-						local weight1 = invertedAlphaSquared * invertedAlpha
-						local weight2 = 3 * invertedAlphaSquared * alpha
-						local weight3 = 3 * invertedAlpha * alphaSquared
-						local weight4 = alphaSquared * alpha
-						
-						return UDim.new(
-							weight1 * aScale + weight2 * cScale + weight3 * dScale + weight4 * bScale,
-							weight1 * aOffset + weight2 * cOffset + weight3 * dOffset + weight4 * bOffset
-						)
-					end
-				end
-				
-				return function(alpha)
-					local invertedAlpha = 1 - alpha
-					local weight1 = invertedAlpha * invertedAlpha
-					local weight2 = 2 * invertedAlpha * alpha
-					local weight3 = alpha * alpha
-					
-					return UDim.new(
-						weight1 * aScale + weight2 * cScale + weight3 * bScale,
-						weight1 * aOffset + weight2 * cOffset + weight3 * bOffset
 					)
 				end
 			end,
@@ -712,11 +675,12 @@ return {
 			end
 			
 			-- Final interpolator.
+			local keypoints = {}
+			
 			return function(alpha)
 				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
-				local keypoints = {}
 				for index, time in uniqueTimes do
 					keypoints[index] = NumberSequenceKeypoint.new(
 						time,
@@ -755,11 +719,12 @@ return {
 			end
 			
 			-- Final interpolator.
+			local keypoints = {}
+			
 			return function(alpha)
 				if alpha == 0 then return a end
 				if alpha == 1 then return b end
 				
-				local keypoints = {}
 				for index, time in uniqueTimes do
 					keypoints[index] = ColorSequenceKeypoint.new(
 						time,

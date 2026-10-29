@@ -9,13 +9,13 @@ local advancedValueFunctions = valueFunctions.Advanced
 
 -- Property validation function.
 local function checkProperty(instance, property)
-	instance[property] = instance[property]
+	instance[property] = instance[property] -- Hack to safely check if a property exists and is writable.
 end
 
 -- Update functions function.
 return function(instance, values)
 	-- Verify values and add update functions for each.
-	local updateFunctions = table.create(#values)
+	local updateFunctions = {}
 	
 	local index = 1
 	for name, destination in values do
@@ -48,6 +48,7 @@ return function(instance, values)
 				if type(destination) == "table" then
 					value = normalBezierValueFunctions[dataType]
 					if not value then error("'"..dataType.."' data type is not supported for bezier curves.", 3) end
+					if #destination < 2 then error("A minimum of 1 control point (quadratic) is required for bezier curves.", 3) end
 					if #destination > 3 then error("A maximum of 2 control points (cubic) are supported for bezier curves.", 3) end
 					for _, value in destination do
 						if typeof(value) ~= dataType then error("'"..name.."' value contains inconsistent datatypes.", 3) end
@@ -71,6 +72,7 @@ return function(instance, values)
 					if type(destination) == "table" then
 						local bezierSet = value.BezierSet
 						if not bezierSet then error("'"..name.."' is not supported for bezier curves.", 3) end
+						if #destination < 2 then error("A minimum of 1 control point (quadratic) is required for bezier curves.", 3) end
 						if #destination > 3 then error("A maximum of 2 control points (cubic) are supported for bezier curves.", 3) end
 						local dataType = typeof(original)
 						for _, value in destination do

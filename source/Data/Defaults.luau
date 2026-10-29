@@ -17,7 +17,9 @@ local defaults = {
 	Reverses = false,
 	RepeatCount = 0,
 	
-	FPS = nil,
+	FPS = false,
+	
+	Once = false,
 	
 	Replicate = false
 }
@@ -35,23 +37,10 @@ else
 	userDefaults = CollectionService:GetTagged("TweenDefaults")[1]
 	if userDefaults then userDefaults = require(userDefaults) end
 end
+
 if userDefaults and type(userDefaults) == "table" then
-	local optionsList = {
-		Time = true,
-		
-		EasingStyle = true,
-		EasingDirection = true,
-		
-		DelayTime = true,
-		Reverses = true,
-		RepeatCount = true,
-		
-		FPS = true,
-		
-		Replicate = true
-	}
 	for key in userDefaults do
-		if optionsList[key] then defaults[key] = userDefaults[key] end
+		if defaults[key] ~= nil then defaults[key] = userDefaults[key] end
 	end
 end
 

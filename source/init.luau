@@ -12,7 +12,7 @@
      ====           ======    ======      ========================   ====     ======        :::     
      ====            ====      ====       ========================   ====       ====                
 
-v2.14.0
+v2.15.0
 
 An open-source tweening library for Roblox, featuring advanced
 datatypes, customization, interpolation, and optimization.
@@ -115,8 +115,8 @@ export type Options = {
 	RepeatCount: number?,
 	Reverses: boolean?,
 	DelayTime: number?,
-	
 	FPS: number?,
+	Once: boolean?,
 	
 	Replicate: boolean?
 }
@@ -126,8 +126,7 @@ type CreateTween = typeof(
 	function(instance: Instance, values: Values, options: Options): Tween end
 )
 
--- Continue depending on context.
-return if RunService:IsClient() then
-	require(script.Client) :: CreateTween
-else -- Server.
-	require(script.Server) :: CreateTween
+-- Continue depending on context and get constructor function.
+local createTween = if RunService:IsClient() then require(script.Client) else require(script.Server)
+
+return createTween :: CreateTween
