@@ -17,10 +17,23 @@ layout:
     visible: true
   actions:
     visible: true
+  anchors:
+    visible: true
 ---
 
 # Introduction
 
-Tween+ offers highly optimized networking for efficient global tweening in games.
+Tween+ has advanced networking capabilities, allowing you to achieve incredibly performant server-controlled global tweens, with support for players joining mid tween.
 
-See the main [DevForum](https://devforum.roblox.com/t/3599638) post for a comparison to TweenService—the performance gap might surprise you.
+{% hint style="info" %}
+Check out the comparison to TweenService in the main [DevForum](https://devforum.roblox.com/t/3599638) post.
+{% endhint %}
+
+You can take full advantage of this by setting up some simple networking and enabling the option, as guided on the next few pages.
+
+
+
+{% hint style="warning" %}
+There is not currently support for StreamingEnabled.
+{% endhint %}
+

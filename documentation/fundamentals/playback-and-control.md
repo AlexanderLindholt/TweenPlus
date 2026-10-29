@@ -17,11 +17,13 @@ layout:
     visible: true
   actions:
     visible: true
+  anchors:
+    visible: true
 ---
 
-# Playback and control
+# Methods
 
-After creating a new tween, you can use the following methods:
+After creating a tween, you can use the following methods:
 
 * [**Start**](#user-content-fn-1)[^1]
 * [**Stop**](#user-content-fn-2)[^2]

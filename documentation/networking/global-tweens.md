@@ -17,11 +17,13 @@ layout:
     visible: true
   actions:
     visible: true
+  anchors:
+    visible: true
 ---
 
 # Global tweens
 
-The server and client tween APIs basically identical, allowing you to reuse the same code on both ends. Only the `Replicated` option is server-only, obviously.
+The server and client tween APIs are essentially identical, allowing you to reuse the same code on both ends. Only the `Replicated` option is server-only, obviously.
 
 Any server tweens, whose `Replicated` option is set to `true`, will act as a global tween that replicates to all clients in the game server.
 
@@ -29,7 +31,7 @@ Any server tweens, whose `Replicated` option is set to `true`, will act as a glo
 
 When using global tweens, make sure to:
 
-* Initialize the Tween+ module on the clients by requiring it.
+* Initialize the Tween+ module on the clients by requiring it in a script.
 * Set the `Replicated` option to `true` on the tween you wish to make global.
 
 
@@ -37,3 +39,4 @@ When using global tweens, make sure to:
 {% hint style="warning" %}
 There’s a limit of 256 total global tweens at once due to optimizations.
 {% endhint %}
+

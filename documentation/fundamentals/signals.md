@@ -17,6 +17,8 @@ layout:
     visible: true
   actions:
     visible: true
+  anchors:
+    visible: true
 ---
 
 # Signals
@@ -24,10 +26,10 @@ layout:
 You can enable signals by installing a signal library.
 
 {% hint style="info" %}
-[Signal+](https://devforum.roblox.com/t/3552231) is highly recommended because it’s the best.
+[Signal+](https://devforum.roblox.com/t/3552231) is highly recommended
 {% endhint %}
 
-Make sure to [tag](https://create.roblox.com/docs/studio/properties#instance-tags) the module `Signal`.
+Simply [tag](https://create.roblox.com/docs/studio/properties#instance-tags) the module `Signal`.
 
 
 

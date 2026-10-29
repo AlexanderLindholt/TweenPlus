@@ -2,26 +2,26 @@
 
 * [Installation](README.md)
 
-## Creation
+## Fundamentals
 
-* [Introduction](creation/introduction/README.md)
-  * [Supported datatypes](creation/introduction/supported-datatypes.md)
-* [Attributes](creation/attributes.md)
-* [Hidden properties](creation/hidden-properties.md)
-* [Options](creation/options/README.md)
-  * [Options list](creation/options/options-list.md)
-  * [FPS](creation/options/fps.md)
-  * [Replicate](creation/options/replicate.md)
-  * [Custom defaults](creation/customization/custom-defaults.md)
-* [Custom easing functions](creation/custom-easing-functions.md)
-* [Bézier curves](creation/bezier-curves.md)
-* [Preallocations](creation/preallocations.md)
+* [Introduction](fundamentals/introduction/README.md)
+  * [Supported datatypes](fundamentals/introduction/supported-datatypes.md)
+* [Attributes](fundamentals/attributes.md)
+* [Hidden properties](fundamentals/hidden-properties.md)
+* [Options](fundamentals/options/README.md)
+  * [Options list](fundamentals/options/options-list.md)
+  * [FPS](fundamentals/options/fps.md)
+  * [Replicate](fundamentals/options/replicate.md)
+  * [Custom defaults](fundamentals/options/custom-defaults.md)
+* [Custom easing](fundamentals/custom-easing.md)
+* [Methods](fundamentals/playback-and-control.md)
+* [States](fundamentals/states.md)
+* [Signals](fundamentals/signals.md)
 
-## Control
+## Bezier Curves
 
-* [Methods](control/playback-and-control.md)
-* [States](control/states.md)
-* [Signals](control/signals.md)
+* [Introduction](bezier-curves/introduction.md)
+* [Paths, speed and length](bezier-curves/paths.md)
 
 ## Networking
 
@@ -29,8 +29,8 @@
 * [Networking library](networking/networking-library.md)
 * [Packets](networking/packets.md)
 * [Global tweens](networking/global-tweens.md)
-* [How it works](networking/how-it-works/README.md)
-  * [Let the client do it](networking/how-it-works/let-the-client-do-it.md)
-  * [Re-use data](networking/how-it-works/re-use-data.md)
-  * [Compress the data](networking/how-it-works/compress-the-data.md)
-  * [Outroduction](networking/how-it-works/outroduction.md)
+* [How it works](networking/how/README.md)
+  * [Client-side prediction](networking/how/client-side-prediction.md)
+  * [Reusing data](networking/how/reusing-data.md)
+  * [Compressing data](networking/how/compressing-data.md)
+  * [Learn more](networking/how/outroduction.md)

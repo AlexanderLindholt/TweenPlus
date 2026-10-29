@@ -18,11 +18,13 @@ layout:
     visible: true
   actions:
     visible: true
+  anchors:
+    visible: true
 ---
 
-# Custom easing functions
+# Custom easing
 
-Instead of moving from 0 to 1 at a constant rate (linear), an easing function remaps time so the speed of the motion changes over the course of the animation.
+Instead of moving from 0 to 1 at a constant speed (linear), an easing function remaps time so the speed of the motion changes over the course of the tween.
 
 Usually, easing styles have 4 "directions":
 
@@ -31,7 +33,7 @@ Usually, easing styles have 4 "directions":
 * **In-Out**: slow → fast → slow
 * **Out-In:** fast → slow → fast
 
-Easing is crucial in animations to make them feel natural, rather than robotic. These functions can be visualized with graphs, showing the motion from A to B. You can check out interactive examples at [easings.net](https://easings.net/).
+Easing is crucial in animation and design to make it feel natural and smooth. The functions can be visualized as graphs, which you can check out at [easings.net](https://easings.net/).
 
 
 
@@ -39,7 +41,7 @@ Easing is crucial in animations to make them feel natural, rather than robotic. 
 
 
 
-To add your own easing functions alongside the built-in ones, simply create a new module in your game, then [tag](https://create.roblox.com/docs/studio/properties#instance-tags) it `EasingFunctions`.
+To add your own easing functions alongside the built-in ones, simply create a new module in your game and [tag](https://create.roblox.com/docs/studio/properties#instance-tags) it `EasingFunctions`.
 
 Here’s the required format:
 
@@ -71,9 +73,9 @@ return {
 ```
 
 {% hint style="success" %}
-Tween+ will let you know if you do anything wrong!
+Tween+ will as always let you know if you do anything wrong!
 {% endhint %}
 
 {% hint style="info" %}
-You can always look in `Tween->Utilities->EasingFunctions` to see how the built-in ones are made. Just keep in mind they’re ultra-optimized.
+You can always look in `Tween->Utilities->EasingFunctions` to see how the built-in ones are made. However, they are ultra-optimized and not meant to be very readable.
 {% endhint %}

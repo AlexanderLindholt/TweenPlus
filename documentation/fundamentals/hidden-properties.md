@@ -17,12 +17,15 @@ layout:
     visible: true
   actions:
     visible: true
+  anchors:
+    visible: true
 ---
 
 # Hidden properties
 
-In Tween+, you can tween method-based properties just like normal properties.
+Certain properties are only configurable via methods (such as `:PivotTo()`).
 
+Fortunately, you can tween these properties as if they were just normal properties in Tween+.\
 Here’s an example:
 
 <pre class="language-luau"><code class="lang-luau">local tween = Tween(
@@ -35,7 +38,8 @@ Here’s an example:
 
 
 
-Here are the supported method-based properties:
+These are all the method-based properties:
 
 * [Pivot](https://create.roblox.com/docs/reference/engine/classes/PVInstance#summary-methods)
 * [Scale](https://create.roblox.com/docs/reference/engine/classes/Model#Scale)
+

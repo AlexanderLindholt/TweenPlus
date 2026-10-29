@@ -17,6 +17,8 @@ layout:
     visible: true
   actions:
     visible: true
+  anchors:
+    visible: true
 ---
 
 # Introduction
@@ -32,7 +34,7 @@ local tween = Tween(
 )
 ```
 
-You simply input all the values you would like to tween:
+You simply input all the values you would like to tween in a table:
 
 <pre class="language-luau"><code class="lang-luau">local tween = Tween(
 	workspace.Part,
