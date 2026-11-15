@@ -29,7 +29,7 @@ and many new amazing additions:
 - Framerate limit control.
 - Beautiful, intuitive syntax.
 - ***And much more!***
-<br>
+
 It’s safe to say that Tween+ does it all, without compromise!
 
 <br>
@@ -39,3 +39,7 @@ It’s safe to say that Tween+ does it all, without compromise!
 - Blazingly fast, ultra-optimized, and lag-free.
 - Robust validation, feedback and design.
 - Clean typing, documentation and syntax.
+<br>
+<br>
+
+### Check out showcases and more information [here](https://devforum.roblox.com/t/3521684)!
